@@ -2,9 +2,9 @@
     "scripts": {
         "watch": "esbuild main.ts --bundle --watch --outfile=static/bundle.js --loader:.nes=binary"
     },
-    "devDependencies": {},
-    "dependencies": {
+    "devDependencies": {
         "6502.ts": "^1.0.4",
         "esbuild": "^0.12.19"
-    }
+    },
+    "dependencies": { }
 }
