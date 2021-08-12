@@ -7,4 +7,5 @@ sound; use ogg files lol
 region detection: check pal rom lol  
 responsive DOM gameplay mode  
 anticheat: server side auth  
+ignore sprite limit
 HD mode 
