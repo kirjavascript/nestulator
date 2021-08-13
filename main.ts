@@ -11,21 +11,24 @@ const PAL = false;
 const header = tetrisROM.slice(0, 0xF);
 const PRG = tetrisROM.slice(0x10, 0x800F);
 const CHR = tetrisROM.slice(0x8010);
+let chrPointer = 0;
 const RAM = new Uint8Array(0x2000);
 
-class TetrisBus implements BusInterface {
-    // ROM;
-    // constructor(ROM) {
-    //     this.ROM = ROM;
-    // }
 
+class TetrisBus implements BusInterface {
     read(address: number) {
-        if (address === 0xFFFD) {
-            return 0x80
+    // $FFFA-$FFFB = NMI vector
+    // $FFFC-$FFFD = Reset vector
+    // $FFFE-$FFFF = IRQ/BRK vector
+        if (address === 0xFFFD) return 0x80;
+        if (address === 0xFFFC) return 0x0;
+
+
+        // RAM
+        if (address < 0x2000) {
+            return RAM[address & 0x7FF];
         }
-        if (address === 0xFFFC) {
-            return 0x0
-        }
+        // ROM
         if (address >= 0x8000) {
             return PRG[address - 0x8000];
         }
@@ -33,27 +36,29 @@ class TetrisBus implements BusInterface {
     }
     peek(address: number): number {
         return this.read(address);
-        // console.error('peek', address.toString(16));
-        // return 0;
     };
     readWord(address: number): number {
 
         console.error('readWord', address.toString(16));
         return 0};
     write(address: number, value: number): void {
-        console.error('write', address.toString(16));
+        if (address < 0x2000) {
+            RAM[address & 0x7FF] = value;
+        } else {
+
+            console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
+            console.error('write', address.toString(16), value.toString(16));
+        }
     };
     poke(address: number, value: number): void {
         console.error('poke', address.toString(16));
     };
 }
 
-
-console.log(PRG.length.toString(16));
-
 const bus = new TetrisBus();
 const cpu = new StateMachineCpu(bus);
 const disasm = new Disassembler(bus);
+
 
 
 // cpu.state.p = 0x4000;
@@ -76,19 +81,34 @@ const disasm = new Disassembler(bus);
 // TODO: get running at fullspeed, fast
 
 setInterval(() => {
-    console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
-    // console.log(Number(cpu.state.p).toString(16))
-    cpu.cycle();
-}, 500)
+    for (let i = 0; i < 1000; i++) {
+
+        if (cpu.executionState === 1) {
+            // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
+        }
+
+        cpu.cycle();
+    }
+
+            debugRAM();
+    // TODO: instead of running x number, of cycles, skip from the rom to vblank
+}, 100)
 
 const debug = document.body.appendChild(document.createElement('pre'));
 
-
 function debugRAM() {
-    // debug.innerHTML =
+    const lines = [];
+    const d = [...RAM];
+    while(d.length) {
+        lines.push(d.splice(0, 16).map(d=>d.toString(16).padStart(2,0)));
+        // tsconfig 2017
+    }
+    debug.innerHTML = lines.join('\n');
 }
 
-//https://wiki.nesdev.com/w/index.php/Cycle_reference_chart
+
+
+// https://wiki.nesdev.com/w/index.php/Cycle_reference_chart
 // watching
 //
 //
