@@ -165,65 +165,110 @@ const interval = setInterval(() => {
     // check interrupts
 
     debugRAM();
+    render();
 
-    if (++bus.frames > 1) {
-        clearInterval(interval);
+    if (++bus.frames > 7) {
+        // clearInterval(interval);
     }
-}, 100);
+}, 1);
 
-// const debug = document.body.appendChild(document.createElement('pre'));
+// screen
 
-function debugRAM() {
-    // const lines = [];
-    // const d = [...VRAM];
-    // for (let cursor = 0; d.length; cursor += 16) {
-    //     lines.push(
-    //         `0x${cursor.toString(16).padStart(4, '0')}: ` +
-    //             d
-    //                 .splice(0, 16)
-    //                 .map((d) => d.toString(16).padStart(2, '0'))
-    //                 .join(','),
-    //     );
-    // }
-    // debug.innerHTML = `PC: ${cpu.state.p.toString(16)}\nframes: ${bus.frames}\n${lines.join('\n')}`;
+const canvas = document.body.appendChild(document.createElement('canvas'));
+
+canvas.width = 256;
+canvas.height = 240;
+const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+function render() {
+    let cursor = 0;
+    for (let y = 0; y < canvas.height; y += 8) {
+        for (let x = 0; x < canvas.width; x += 8) {
+            const tile = VRAM[0x2000+cursor++];
+
+            const chrOff = tile * 0x10;
+            const chrData = CHR.slice(chrOff, chrOff+0x10);
+
+
+            const pixels = [];
+            for (let i = 0; i < 8; i++) {
+                const high = chrData[i].toString(2).padStart(8, '0');
+                const low = chrData[i+8].toString(2).padStart(0, '0');
+                for (let j = 0; j < 8; j++) {
+                    pixels.push(parseInt(high[j]+low[j], 2))
+                }
+            }
+            const imageData = ctx.createImageData(8, 8);
+
+
+            pixels.forEach((pixel, i) => {
+                imageData.data[(i * 4) + 0] = 85 * pixel;
+                imageData.data[(i * 4) + 1] = 85 * pixel;
+                imageData.data[(i * 4) + 2] = 85 * pixel;
+                imageData.data[(i * 4) + 3] = 255;
+            })
+
+            ctx.putImageData(imageData, x, y);
+
+        }
+    }
 }
+
 
 // tiles, palette, nametable
 
-for (let Q = 0; Q < 0x100; Q+= 0x10) {
+// for (let Q = 0; Q < 0x100; Q+= 0x10) {
 
 
-const canvas = document.body.appendChild(document.createElement('canvas'));
-canvas.width = 8
-canvas.height = 8;
-const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-const tile = CHR.slice(Q, Q+0x10);
+// const canvas = document.body.appendChild(document.createElement('canvas'));
+// canvas.width = 8
+// canvas.height = 8;
+// const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+// const tile = CHR.slice(Q, Q+0x10);
 
-const pixels = [];
-const imageData = ctx.createImageData(8, 8);
+// const pixels = [];
+// const imageData = ctx.createImageData(8, 8);
 
-// https://www.dustmop.io/blog/2015/04/28/nes-graphics-part-1/#chr-encoding
+// // https://www.dustmop.io/blog/2015/04/28/nes-graphics-part-1/#chr-encoding
 
-console.log(CHR);
+// console.log(CHR);
 
-// TODO: uncompress CHR for general use
+// // TODO: uncompress CHR for general use
 
-for (let i = 0; i < 8; i++) {
-    const high = tile[i].toString(2).padStart(8, '0');
-    const low = tile[i+8].toString(2).padStart(0, '0');
-    for (let j = 0; j < 8; j++) {
-        pixels.push(parseInt(high[j]+low[j], 2))
+// for (let i = 0; i < 8; i++) {
+//     const high = tile[i].toString(2).padStart(8, '0');
+//     const low = tile[i+8].toString(2).padStart(0, '0');
+//     for (let j = 0; j < 8; j++) {
+//         pixels.push(parseInt(high[j]+low[j], 2))
+//     }
+// }
+
+// console.log(pixels);
+
+// pixels.forEach((pixel, i) => {
+//     imageData.data[(i * 4) + 0] = 85 * pixel;
+//     imageData.data[(i * 4) + 1] = 85 * pixel;
+//     imageData.data[(i * 4) + 2] = 85 * pixel;
+//     imageData.data[(i * 4) + 3] = 255;
+// })
+
+// ctx.putImageData(imageData, 0, 0);
+// }
+
+
+const debug = document.body.appendChild(document.createElement('pre'));
+
+function debugRAM() {
+    const lines = [];
+    const d = [...RAM];
+    for (let cursor = 0; d.length; cursor += 16) {
+        lines.push(
+            `0x${cursor.toString(16).padStart(4, '0')}: ` +
+                d
+                    .splice(0, 16)
+                    .map((d) => d.toString(16).padStart(2, '0'))
+                    .join(','),
+        );
     }
-}
-
-console.log(pixels);
-
-pixels.forEach((pixel, i) => {
-    imageData.data[(i * 4) + 0] = 85 * pixel;
-    imageData.data[(i * 4) + 1] = 85 * pixel;
-    imageData.data[(i * 4) + 2] = 85 * pixel;
-    imageData.data[(i * 4) + 3] = 255;
-})
-
-ctx.putImageData(imageData, 0, 0);
+    debug.innerHTML = `PC: ${cpu.state.p.toString(16)}\nframes: ${bus.frames}\n${lines.join('\n')}`;
 }
