@@ -8,4 +8,5 @@ region detection: check pal rom lol
 responsive DOM gameplay mode  
 anticheat: server side auth  
 ignore sprite limit
+HLE + jum[ out of rom
 HD mode 

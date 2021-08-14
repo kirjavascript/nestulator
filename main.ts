@@ -5,6 +5,7 @@ import tetrisROM from './tetris.nes';
 
 // foxNES/CTMulator
 
+// TODO: skip vram writes and just read from CHR
 // arraybuffers for ram
 
 const PAL = false;
@@ -13,11 +14,14 @@ const PRG = tetrisROM.slice(0x10, 0x800f);
 const CHR = tetrisROM.slice(0x8010);
 let chrPointer = 0;
 const RAM = new Uint8Array(0x2000);
+const VRAM = new Uint8Array(0x4000);
 
 class TetrisBus implements BusInterface {
+    frames: number = 0;
     vblank: boolean = false;
-    // frames
-    // nmi enabled
+    nmiEnabled: boolean = true;
+    ppuAddr: number = 0;
+    ppuAddrIndex: number = 0;
     read(address: number) {
         // vectors
         if (address === 0xfffa) return 0x05; // nmi
@@ -50,13 +54,6 @@ class TetrisBus implements BusInterface {
         console.error('read', address.toString(16));
         return 0;
     }
-    peek(address: number): number {
-        return this.read(address);
-    }
-    readWord(address: number): number {
-        console.error('readWord', address.toString(16));
-        return 0;
-    }
     write(address: number, value: number): void {
         if (address < 0x2000) {
             RAM[address & 0x7ff] = value;
@@ -65,13 +62,13 @@ class TetrisBus implements BusInterface {
         if (address === 0x2000) {
             // PPUCTRL
             if (value === 0x90) {
-                // TODO: NMI enable
-                // background tile select
+                // backgroundTile = Boolean(value & 0b10000)
+                this.nmiEnabled = Boolean(value & 0b10000000);
             }
             return;
         }
         if (address === 0x2001) {
-            // PPUMASK
+            // PPUMASK, ignore
             return;
         }
         if (address === 0x2003) {
@@ -80,6 +77,20 @@ class TetrisBus implements BusInterface {
         }
         if (address === 0x2005) {
             // PPUSCROLL, ignore
+            return;
+        }
+        if (address === 0x2006) {
+            if (this.ppuAddrIndex === 0) {
+                this.ppuAddr = value;
+            } else {
+                this.ppuAddr = (this.ppuAddr << 8) + value;
+            }
+            this.ppuAddrIndex ^= 1;
+            return;
+        }
+        if (address === 0x2007) {
+            VRAM[this.ppuAddr & 0x3FFF] = value;
+            this.ppuAddr++;
             return;
         }
         if (address === 0x4016) {
@@ -91,11 +102,25 @@ class TetrisBus implements BusInterface {
             return;
         }
 
+        if (address === 0xBFFF) return; // MMC_Control
+        if (address === 0xDFFF) return; // ChangeCHRBank
+        // if (address === 0xDFFF) {
+        //     console.error('ChangeCHRBank', value);
+        //     return;
+        // }
+
         console.log(['last', Number(cpu.state.p).toString(16)]);
         console.error('write', address.toString(16), value.toString(16));
     }
+    peek(address: number): number {
+        return this.read(address);
+    }
     poke(address: number, value: number): void {
-        console.error('poke', address.toString(16));
+        return this.write(address, value)
+    }
+    readWord(address: number): number {
+        console.error('readWord', address.toString(16));
+        return 0;
     }
 }
 
@@ -103,16 +128,10 @@ const bus = new TetrisBus();
 const cpu = new StateMachineCpu(bus);
 const disasm = new Disassembler(bus);
 
-// TODO: vectors
-
-// TODO: load tetris ROM
-// TODO: dump PC each cycle
-
-let frames = 0;
 const nmiCycles = 2273;
 
 const interval = setInterval(() => {
-    const totalCycles = 29780 + (frames & 1) // NTSC
+    const totalCycles = 29780 + (bus.frames & 1) // NTSC
 
     bus.vblank = false;
 
@@ -125,9 +144,10 @@ const interval = setInterval(() => {
         // TODO: instead of running x number, of cycles, skip from the rom to vblank
     }
 
-    cpu.nmi();
-
-    bus.vblank = true;
+    if (bus.nmiEnabled) {
+        cpu.nmi();
+        bus.vblank = true;
+    }
 
     for (let i = 0; i < nmiCycles; i++) {
         if (cpu.executionState === 1) {
@@ -140,10 +160,9 @@ const interval = setInterval(() => {
 
     // check interrupts
 
-    console.log(cpu.state.p.toString(16));
     debugRAM();
 
-    if (++frames > 1) {
+    if (++bus.frames > 60) {
         clearInterval(interval);
     }
 }, 1);
@@ -154,7 +173,7 @@ const debug = document.body.appendChild(document.createElement('pre'));
 
 function debugRAM() {
     const lines = [];
-    const d = [...RAM];
+    const d = [...VRAM];
     for (let cursor = 0; d.length; cursor += 16) {
         lines.push(
             `0x${cursor.toString(16).padStart(4, '0')}: ` +
@@ -164,5 +183,5 @@ function debugRAM() {
                     .join(','),
         );
     }
-    debug.innerHTML = `frames: ${frames}\n${lines.join('\n')}`;
+    debug.innerHTML = `PC: ${cpu.state.p.toString(16)}\nframes: ${bus.frames}\n${lines.join('\n')}`;
 }
