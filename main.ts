@@ -3,16 +3,19 @@ import BusInterface from '6502.ts/lib/machine/bus/BusInterface';
 import Disassembler from '6502.ts/lib/machine/cpu/Disassembler';
 import tetrisROM from './tetris.nes';
 
+// fast and accurate (with hacks)
 // foxNES/CTMulator
 
 // TODO: skip vram writes and just read from CHR
+// TODO: runahead
+// TODO: only redraw background if it changes (when nametable is written to)
+// TODO: background and sprites on different buffers
 // arraybuffers for ram
 
 const PAL = false;
-const header = tetrisROM.slice(0, 0xf);
-const PRG = tetrisROM.slice(0x10, 0x800f);
-const CHR = tetrisROM.slice(0x8010);
-let chrPointer = 0;
+const header = tetrisROM.slice(0, 0x10);
+const PRG = tetrisROM.slice(0x10, 0x8010);
+const CHR = tetrisROM.slice(0x8010); // 2bpp, 16 per tile
 const RAM = new Uint8Array(0x2000);
 const VRAM = new Uint8Array(0x4000);
 
@@ -22,6 +25,7 @@ class TetrisBus implements BusInterface {
     nmiEnabled: boolean = true;
     ppuAddr: number = 0;
     ppuAddrIndex: number = 0;
+    // chrPointer
     read(address: number) {
         // vectors
         if (address === 0xfffa) return 0x05; // nmi
@@ -102,10 +106,10 @@ class TetrisBus implements BusInterface {
             return;
         }
 
-        if (address === 0xBFFF) return; // MMC_Control
-        if (address === 0xDFFF) return; // ChangeCHRBank
+        if (address === 0xBFFF) return; // ChangeCHRBank0
+        if (address === 0xDFFF) return; // ChangeCHRBank1
         // if (address === 0xDFFF) {
-        //     console.error('ChangeCHRBank', value);
+        //     console.error('ChangeCHRBank1', value);
         //     return;
         // }
 
@@ -162,26 +166,64 @@ const interval = setInterval(() => {
 
     debugRAM();
 
-    if (++bus.frames > 60) {
+    if (++bus.frames > 1) {
         clearInterval(interval);
     }
-}, 1);
+}, 100);
 
-
-
-const debug = document.body.appendChild(document.createElement('pre'));
+// const debug = document.body.appendChild(document.createElement('pre'));
 
 function debugRAM() {
-    const lines = [];
-    const d = [...VRAM];
-    for (let cursor = 0; d.length; cursor += 16) {
-        lines.push(
-            `0x${cursor.toString(16).padStart(4, '0')}: ` +
-                d
-                    .splice(0, 16)
-                    .map((d) => d.toString(16).padStart(2, '0'))
-                    .join(','),
-        );
+    // const lines = [];
+    // const d = [...VRAM];
+    // for (let cursor = 0; d.length; cursor += 16) {
+    //     lines.push(
+    //         `0x${cursor.toString(16).padStart(4, '0')}: ` +
+    //             d
+    //                 .splice(0, 16)
+    //                 .map((d) => d.toString(16).padStart(2, '0'))
+    //                 .join(','),
+    //     );
+    // }
+    // debug.innerHTML = `PC: ${cpu.state.p.toString(16)}\nframes: ${bus.frames}\n${lines.join('\n')}`;
+}
+
+// tiles, palette, nametable
+
+for (let Q = 0; Q < 0x100; Q+= 0x10) {
+
+
+const canvas = document.body.appendChild(document.createElement('canvas'));
+canvas.width = 8
+canvas.height = 8;
+const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+const tile = CHR.slice(Q, Q+0x10);
+
+const pixels = [];
+const imageData = ctx.createImageData(8, 8);
+
+// https://www.dustmop.io/blog/2015/04/28/nes-graphics-part-1/#chr-encoding
+
+console.log(CHR);
+
+// TODO: uncompress CHR for general use
+
+for (let i = 0; i < 8; i++) {
+    const high = tile[i].toString(2).padStart(8, '0');
+    const low = tile[i+8].toString(2).padStart(0, '0');
+    for (let j = 0; j < 8; j++) {
+        pixels.push(parseInt(high[j]+low[j], 2))
     }
-    debug.innerHTML = `PC: ${cpu.state.p.toString(16)}\nframes: ${bus.frames}\n${lines.join('\n')}`;
+}
+
+console.log(pixels);
+
+pixels.forEach((pixel, i) => {
+    imageData.data[(i * 4) + 0] = 85 * pixel;
+    imageData.data[(i * 4) + 1] = 85 * pixel;
+    imageData.data[(i * 4) + 2] = 85 * pixel;
+    imageData.data[(i * 4) + 3] = 255;
+})
+
+ctx.putImageData(imageData, 0, 0);
 }
