@@ -8,8 +8,7 @@ import tetrisROM from './tetris.nes';
 
 // TODO: skip vram writes and just read from CHR
 // TODO: runahead
-// TODO: only redraw background if it changes (when nametable is written to)
-// TODO: background and sprites on different buffers
+// TODO: background and sprites on different canvases
 // arraybuffers for ram
 
 const PAL = false;
@@ -94,9 +93,9 @@ class TetrisBus implements BusInterface {
             return;
         }
         if (address === 0x2007) {
-            const addr = this.ppuAddr & 0x3FFF;
+            const addr = this.ppuAddr & 0x3fff;
             VRAM[addr] = value;
-            if (!this.nametableDirty && (addr >= 0x2000 && addr < 0x2FC0)) {
+            if (!this.nametableDirty && addr >= 0x2000 && addr < 0x2fc0) {
                 this.nametableDirty = true;
             }
             this.ppuAddr++;
@@ -111,8 +110,8 @@ class TetrisBus implements BusInterface {
             return;
         }
 
-        if (address === 0xBFFF) return; // ChangeCHRBank0
-        if (address === 0xDFFF) return; // ChangeCHRBank1
+        if (address === 0xbfff) return; // ChangeCHRBank0
+        if (address === 0xdfff) return; // ChangeCHRBank1
         // if (address === 0xDFFF) {
         //     console.error('ChangeCHRBank1', value);
         //     return;
@@ -125,7 +124,7 @@ class TetrisBus implements BusInterface {
         return this.read(address);
     }
     poke(address: number, value: number): void {
-        return this.write(address, value)
+        return this.write(address, value);
     }
     readWord(address: number): number {
         console.error('readWord', address.toString(16));
@@ -140,7 +139,7 @@ const disasm = new Disassembler(bus);
 const nmiCycles = 2273;
 
 const interval = setInterval(() => {
-    const totalCycles = 29780 + (bus.frames & 1) // NTSC
+    const totalCycles = 29780 + (bus.frames & 1); // NTSC
 
     bus.vblank = false;
 
@@ -188,12 +187,72 @@ canvas.width = 256;
 canvas.height = 240;
 const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-const colors = [ 0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC, 0x940084, 0xA80020, 0xA81000, 0x881400, 0x503000, 0x007800, 0x006800, 0x005800, 0x004058, 0x000000, 0x000000, 0x000000,
-    0xBCBCBC, 0x0078F8, 0x0058F8, 0x6844FC, 0xD800CC, 0xE40058, 0xF83800, 0xE45C10, 0xAC7C00, 0x00B800, 0x00A800, 0x00A844, 0x008888, 0x000000, 0x000000, 0x000000,
-    0xF8F8F8, 0x3CBCFC, 0x6888FC, 0x9878F8, 0xF878F8, 0xF85898, 0xF87858, 0xFCA044, 0xF8B800, 0xB8F818, 0x58D854, 0x58F898, 0x00E8D8, 0x787878, 0x000000, 0x000000,
-    0xFCFCFC, 0xA4E4FC, 0xB8B8F8, 0xD8B8F8, 0xF8B8F8, 0xF8A4C0, 0xF0D0B0, 0xFCE0A8, 0xF8D878, 0xD8F878, 0xB8F8B8, 0xB8F8D8, 0x00FCFC, 0xF8D8F8, 0x000000, 0x000000
+const colors = [
+    0x7c7c7c,
+    0x0000fc,
+    0x0000bc,
+    0x4428bc,
+    0x940084,
+    0xa80020,
+    0xa81000,
+    0x881400,
+    0x503000,
+    0x007800,
+    0x006800,
+    0x005800,
+    0x004058,
+    0x000000,
+    0x000000,
+    0x000000,
+    0xbcbcbc,
+    0x0078f8,
+    0x0058f8,
+    0x6844fc,
+    0xd800cc,
+    0xe40058,
+    0xf83800,
+    0xe45c10,
+    0xac7c00,
+    0x00b800,
+    0x00a800,
+    0x00a844,
+    0x008888,
+    0x000000,
+    0x000000,
+    0x000000,
+    0xf8f8f8,
+    0x3cbcfc,
+    0x6888fc,
+    0x9878f8,
+    0xf878f8,
+    0xf85898,
+    0xf87858,
+    0xfca044,
+    0xf8b800,
+    0xb8f818,
+    0x58d854,
+    0x58f898,
+    0x00e8d8,
+    0x787878,
+    0x000000,
+    0x000000,
+    0xfcfcfc,
+    0xa4e4fc,
+    0xb8b8f8,
+    0xd8b8f8,
+    0xf8b8f8,
+    0xf8a4c0,
+    0xf0d0b0,
+    0xfce0a8,
+    0xf8d878,
+    0xd8f878,
+    0xb8f8b8,
+    0xb8f8d8,
+    0x00fcfc,
+    0xf8d8f8,
+    0x000000,
+    0x000000,
 ];
-
 
 // https://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
 const paletteDebug = document.body.appendChild(document.createElement('div'));
@@ -202,48 +261,57 @@ function renderBG() {
     let cursor = 0;
 
     const palettes = [
-        VRAM.slice(0x3F01, 0x3F04),
-        VRAM.slice(0x3F05, 0x3F08),
-        VRAM.slice(0x3F09, 0x3F0C),
-        VRAM.slice(0x3F0D, 0x3F10),
-    ].map(line => [0xF, ...line]);
+        VRAM.slice(0x3f01, 0x3f04),
+        VRAM.slice(0x3f05, 0x3f08),
+        VRAM.slice(0x3f09, 0x3f0c),
+        VRAM.slice(0x3f0d, 0x3f10),
+    ].map((line) => [0xf, ...line]);
 
-    paletteDebug.innerHTML = ''
-    palettes.map(d=>Array.from(d)).flat().forEach(color => {
-        const box = document.createElement('div');
-        box.textContent = color.toString(16);
-        box.style.backgroundColor = '#' + colors[color].toString(16).padStart(6, '0');
-        paletteDebug.appendChild(box);
-        // paletteDebug.appendChild(Object.assign(, {
-        //     textContent: color.toString(16),
-        //     style: {
+    paletteDebug.innerHTML = '';
+    palettes
+        .map((d) => Array.from(d))
+        .flat()
+        .forEach((color) => {
+            const box = document.createElement('div');
+            box.textContent = color.toString(16);
+            box.style.backgroundColor =
+                '#' + colors[color].toString(16).padStart(6, '0');
+            paletteDebug.appendChild(box);
+            // paletteDebug.appendChild(Object.assign(, {
+            //     textContent: color.toString(16),
+            //     style: {
 
-        //         // backgroundColor: '#' + colors[color].toString(16),
-        //         backgroundColor:'red',
-        //     },
-        // }));
-    });
+            //         // backgroundColor: '#' + colors[color].toString(16),
+            //         backgroundColor:'red',
+            //     },
+            // }));
+        });
 
     for (let y = 0; y < canvas.height / 8; y++) {
         for (let x = 0; x < canvas.width / 8; x++) {
-            const tile = VRAM[0x2000+cursor++];
+            const tile = VRAM[0x2000 + cursor++];
 
-            const attrIndex = Math.floor((x / 4) + (y / 128)*8) + 0x23c0;
+            const attrIndex = Math.floor(x / 2) + (Math.floor(y*2 )) + 0x23c0;
             const attr = VRAM[attrIndex];
+            if (bus.frames === 6) {
+
+            console.log(x, y, attr, attrIndex.toString(16));
+            }
             const shift = ((x & 1) * 2) + ((y & 1) * 4);
             const paletteLine = (attr >> shift) & 0b11;
             const palette = palettes[paletteLine];
             // console.log(palette, paletteLine);
 
             const chrOff = tile * 0x10;
-            const chrData = CHR.slice(chrOff, chrOff+0x10);
+            const chrData = CHR.slice(chrOff, chrOff + 0x10);
 
+            // TODO: cache this stuff
             const pixels = [];
             for (let i = 0; i < 8; i++) {
                 const high = chrData[i].toString(2).padStart(8, '0');
-                const low = chrData[i+8].toString(2).padStart(8, '0');
+                const low = chrData[i + 8].toString(2).padStart(8, '0');
                 for (let j = 0; j < 8; j++) {
-                    pixels.push(parseInt(high[j]+low[j], 2))
+                    pixels.push(parseInt(high[j] + low[j], 2));
                 }
             }
             const imageData = ctx.createImageData(8, 8);
@@ -252,20 +320,19 @@ function renderBG() {
 
             pixels.forEach((pixel, i) => {
                 if (greyscale) {
-                    imageData.data[(i * 4) + 0] = 85 * pixel;
-                    imageData.data[(i * 4) + 1] = 85 * pixel;
-                    imageData.data[(i * 4) + 2] = 85 * pixel;
+                    imageData.data[i * 4 + 0] = 85 * pixel;
+                    imageData.data[i * 4 + 1] = 85 * pixel;
+                    imageData.data[i * 4 + 2] = 85 * pixel;
                 } else {
                     const color = colors[palette[pixel]];
-                    imageData.data[(i * 4) + 0] = color >> 16;
-                    imageData.data[(i * 4) + 1] = (color >> 8) & 0xFF;
-                    imageData.data[(i * 4) + 2] = color & 0xFF;
+                    imageData.data[i * 4 + 0] = color >> 16;
+                    imageData.data[i * 4 + 1] = (color >> 8) & 0xff;
+                    imageData.data[i * 4 + 2] = color & 0xff;
                 }
-                imageData.data[(i * 4) + 3] = 255;
-            })
+                imageData.data[i * 4 + 3] = 255;
+            });
 
             ctx.putImageData(imageData, x * 8, y * 8);
-
         }
     }
 }
@@ -274,7 +341,7 @@ const debug = document.body.appendChild(document.createElement('pre'));
 
 function debugRAM() {
     const lines = [];
-    const d = [...RAM];
+    const d = [...VRAM];
     for (let cursor = 0; d.length; cursor += 16) {
         lines.push(
             `0x${cursor.toString(16).padStart(4, '0')}: ` +
@@ -284,5 +351,7 @@ function debugRAM() {
                     .join(','),
         );
     }
-    debug.innerHTML = `PC: ${cpu.state.p.toString(16)}\nframes: ${bus.frames}\n${lines.join('\n')}`;
+    debug.innerHTML = `PC: ${cpu.state.p.toString(16)}\nframes: ${
+        bus.frames
+    }\n${lines.join('\n')}`;
 }
