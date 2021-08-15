@@ -25,6 +25,7 @@ class TetrisBus implements BusInterface {
     nmiEnabled: boolean = true;
     ppuAddr: number = 0;
     ppuAddrIndex: number = 0;
+    nametableDirty: boolean = false;
     // chrPointer
     read(address: number) {
         // vectors
@@ -93,7 +94,11 @@ class TetrisBus implements BusInterface {
             return;
         }
         if (address === 0x2007) {
-            VRAM[this.ppuAddr & 0x3FFF] = value;
+            const addr = this.ppuAddr & 0x3FFF;
+            VRAM[addr] = value;
+            if (!this.nametableDirty && (addr >= 0x2000 && addr < 0x2FC0)) {
+                this.nametableDirty = true;
+            }
             this.ppuAddr++;
             return;
         }
@@ -165,10 +170,13 @@ const interval = setInterval(() => {
     // check interrupts
 
     debugRAM();
-    render();
+    if (bus.nametableDirty) {
+        bus.nametableDirty = false;
+        renderBG();
+    }
 
-    if (++bus.frames > 7) {
-        // clearInterval(interval);
+    if (++bus.frames > 800) {
+        clearInterval(interval);
     }
 }, 1);
 
@@ -180,20 +188,34 @@ canvas.width = 256;
 canvas.height = 240;
 const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-function render() {
+function renderBG() {
     let cursor = 0;
-    for (let y = 0; y < canvas.height; y += 8) {
-        for (let x = 0; x < canvas.width; x += 8) {
+
+    const palettes = [
+        VRAM.slice(0x3F05, 0x3F08),
+        VRAM.slice(0x3F09, 0x3F0C),
+        VRAM.slice(0x3F0D, 0x3F10),
+    ];
+
+    console.log(palettes);
+
+    for (let y = 0; y < canvas.height / 8; y++) {
+        for (let x = 0; x < canvas.width / 8; x++) {
             const tile = VRAM[0x2000+cursor++];
+
+            const attrIndex = Math.floor((x / 4) + (y / 128)*8) + 0x23c0;
+            const attr = VRAM[attrIndex];
+            const shift = ((x & 1) * 2) + ((y & 1) * 4);
+            const paletteLine = (attr >> shift) & 0b11;
+            const palette = palettes[paletteLine];
 
             const chrOff = tile * 0x10;
             const chrData = CHR.slice(chrOff, chrOff+0x10);
 
-
             const pixels = [];
             for (let i = 0; i < 8; i++) {
                 const high = chrData[i].toString(2).padStart(8, '0');
-                const low = chrData[i+8].toString(2).padStart(0, '0');
+                const low = chrData[i+8].toString(2).padStart(8, '0');
                 for (let j = 0; j < 8; j++) {
                     pixels.push(parseInt(high[j]+low[j], 2))
                 }
@@ -208,53 +230,11 @@ function render() {
                 imageData.data[(i * 4) + 3] = 255;
             })
 
-            ctx.putImageData(imageData, x, y);
+            ctx.putImageData(imageData, x * 8, y * 8);
 
         }
     }
 }
-
-
-// tiles, palette, nametable
-
-// for (let Q = 0; Q < 0x100; Q+= 0x10) {
-
-
-// const canvas = document.body.appendChild(document.createElement('canvas'));
-// canvas.width = 8
-// canvas.height = 8;
-// const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-// const tile = CHR.slice(Q, Q+0x10);
-
-// const pixels = [];
-// const imageData = ctx.createImageData(8, 8);
-
-// // https://www.dustmop.io/blog/2015/04/28/nes-graphics-part-1/#chr-encoding
-
-// console.log(CHR);
-
-// // TODO: uncompress CHR for general use
-
-// for (let i = 0; i < 8; i++) {
-//     const high = tile[i].toString(2).padStart(8, '0');
-//     const low = tile[i+8].toString(2).padStart(0, '0');
-//     for (let j = 0; j < 8; j++) {
-//         pixels.push(parseInt(high[j]+low[j], 2))
-//     }
-// }
-
-// console.log(pixels);
-
-// pixels.forEach((pixel, i) => {
-//     imageData.data[(i * 4) + 0] = 85 * pixel;
-//     imageData.data[(i * 4) + 1] = 85 * pixel;
-//     imageData.data[(i * 4) + 2] = 85 * pixel;
-//     imageData.data[(i * 4) + 3] = 255;
-// })
-
-// ctx.putImageData(imageData, 0, 0);
-// }
-
 
 const debug = document.body.appendChild(document.createElement('pre'));
 
