@@ -21,20 +21,6 @@ const CHR = tetrisROM.slice(0x8010); // 2bpp, 16 per tile
 const RAM = new Uint8Array(0x2000);
 const VRAM = new Uint8Array(0x4000);
 
-// function getCell(x, y) {
-//     const r = Math.floor(x / 4) + (Math.floor(y /4) * 8) + 0x23c0;
-//     console.log(x, y, r.toString(16))
-// }
-
-
-
-//     getCell(31, 0);
-//     getCell(0, 0);
-//     getCell(0, 1);
-//     getCell(0, 2);
-//     getCell(0, 2);
-//     getCell(0, 4);
-
 class TetrisBus implements BusInterface {
     frames: number = 0;
     vblank: boolean = false;
@@ -192,7 +178,7 @@ const interval = setInterval(() => {
     }
 
     if (++bus.frames > 6) {
-        clearInterval(interval);
+        // clearInterval(interval);
     }
 }, 1);
 
@@ -208,6 +194,7 @@ const colors = [ 0x7c7c7c, 0x0000fc, 0x0000bc, 0x4428bc, 0x940084, 0xa80020, 0xa
 
 // https://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
 const paletteDebug = document.body.appendChild(document.createElement('div'));
+paletteDebug.style.display = 'flex';
 
 function renderBG() {
     let cursor = 0;
@@ -235,11 +222,10 @@ function renderBG() {
         for (let x = 0; x < canvas.width / 8; x++) {
             const tile = VRAM[0x2000 + cursor++];
 
-            // TODO /2*8 === *4
             const attrIndex =
                 Math.floor(x / 4) + (Math.floor(y / 4) * 8) + 0x23c0;
             const attr = VRAM[attrIndex];
-            const shift = ((x & 1) * 2) + ((y & 1 ^ 1) * 4);
+            const shift = ((x/2 & 1) * 2) + ((y/2 & 1) * 4);
             const paletteLine = (attr >> shift) & 0b11;
             const palette = palettes[paletteLine];
 
@@ -282,9 +268,10 @@ function renderBG() {
 
             ctx.putImageData(imageData, x * 8, y * 8);
 
-            ctx.fillStyle = 'white';
-            ctx.font = '10px Arial';
-            ctx.fillText(attr.toString(16), x*8, y*8);
+            // ctx.fillStyle = 'white';
+            // ctx.font = '10px Arial';
+            // ctx.fillText(attr.toString(16), x*8, 8 + (y*8));
+            // ctx.fillText(shift, x*8, 8 + y*8);
         }
     }
 }
