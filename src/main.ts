@@ -11,6 +11,7 @@ import tetrisROM from '../tetris.nes';
 // TODO: background and sprites on different canvases
 // TODO: block tool
 // TODO: timestamps, security via obscurity
+// TODO: refactor everything
 // arraybuffers for ram
 
 // const PAL = false;
@@ -19,6 +20,20 @@ const PRG = tetrisROM.slice(0x10, 0x8010);
 const CHR = tetrisROM.slice(0x8010); // 2bpp, 16 per tile
 const RAM = new Uint8Array(0x2000);
 const VRAM = new Uint8Array(0x4000);
+
+// function getCell(x, y) {
+//     const r = Math.floor(x / 4) + (Math.floor(y /4) * 8) + 0x23c0;
+//     console.log(x, y, r.toString(16))
+// }
+
+
+
+//     getCell(31, 0);
+//     getCell(0, 0);
+//     getCell(0, 1);
+//     getCell(0, 2);
+//     getCell(0, 2);
+//     getCell(0, 4);
 
 class TetrisBus implements BusInterface {
     frames: number = 0;
@@ -214,14 +229,6 @@ function renderBG() {
             box.style.backgroundColor =
                 '#' + colors[color].toString(16).padStart(6, '0');
             paletteDebug.appendChild(box);
-            // paletteDebug.appendChild(Object.assign(, {
-            //     textContent: color.toString(16),
-            //     style: {
-
-            //         // backgroundColor: '#' + colors[color].toString(16),
-            //         backgroundColor:'red',
-            //     },
-            // }));
         });
 
     for (let y = 0; y < canvas.height / 8; y++) {
@@ -229,9 +236,10 @@ function renderBG() {
             const tile = VRAM[0x2000 + cursor++];
 
             // TODO /2*8 === *4
-            const attrIndex = Math.floor(x / 2) + (Math.floor(y/2) * 8) + 0x23c0;
+            const attrIndex =
+                Math.floor(x / 4) + (Math.floor(y / 4) * 8) + 0x23c0;
             const attr = VRAM[attrIndex];
-            const shift = ((x & 1) * 2) + ((y & 1) * 4);
+            const shift = ((x & 1) * 2) + ((y & 1 ^ 1) * 4);
             const paletteLine = (attr >> shift) & 0b11;
             const palette = palettes[paletteLine];
 
@@ -252,10 +260,10 @@ function renderBG() {
             const greyscale = false;
 
             if (bus.frames === 6) {
-
-            // console.log(paletteLine);
-            // console.log(x, y, attr, attrIndex.toString(16));
-            console.log(pixels+[]);
+                // console.log(shift)
+                // console.log(paletteLine);
+                // console.log(x, y, attr, attrIndex.toString(16));
+                // console.log(pixels+[]);
             }
 
             pixels.forEach((pixel, i) => {
@@ -265,14 +273,18 @@ function renderBG() {
                     imageData.data[i * 4 + 2] = 85 * pixel;
                 } else {
                     const color = colors[palette[pixel]];
-                    imageData.data[(i * 4) + 0] = color >> 16;
-                    imageData.data[(i * 4) + 1] = (color >> 8) & 0xff;
-                    imageData.data[(i * 4) + 2] = color & 0xff;
+                    imageData.data[i * 4 + 0] = color >> 16;
+                    imageData.data[i * 4 + 1] = (color >> 8) & 0xff;
+                    imageData.data[i * 4 + 2] = color & 0xff;
                 }
                 imageData.data[i * 4 + 3] = 255;
             });
 
             ctx.putImageData(imageData, x * 8, y * 8);
+
+            ctx.fillStyle = 'white';
+            ctx.font = '10px Arial';
+            ctx.fillText(attr.toString(16), x*8, y*8);
         }
     }
 }
