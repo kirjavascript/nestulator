@@ -8,13 +8,14 @@ import buttonIsDown from './joypad';
 // fast and accurate (with hacks)
 // foxNES/CTMulator
 
-// TODO: skip vram writes and just read from CHR
+// TODO: sprites
+// TODO: audio
+//
 // TODO: runahead
 // TODO: background and sprites on different canvases
 // TODO: block tool
 // TODO: timestamps, security via obscurity
 // TODO: refactor everything
-// arraybuffers for ram
 
 // const PAL = false;
 // const _header = tetrisROM.slice(0, 0x10);
@@ -22,6 +23,7 @@ const PRG = tetrisROM.slice(0x10, 0x8010);
 const CHR = tetrisROM.slice(0x8010); // 2bpp, 16 per tile
 const RAM = new Uint8Array(0x2000);
 const VRAM = new Uint8Array(0x4000);
+const colors = [ 0x7c7c7c, 0x0000fc, 0x0000bc, 0x4428bc, 0x940084, 0xa80020, 0xa81000, 0x881400, 0x503000, 0x007800, 0x006800, 0x005800, 0x004058, 0x000000, 0x000000, 0x000000, 0xbcbcbc, 0x0078f8, 0x0058f8, 0x6844fc, 0xd800cc, 0xe40058, 0xf83800, 0xe45c10, 0xac7c00, 0x00b800, 0x00a800, 0x00a844, 0x008888, 0x000000, 0x000000, 0x000000, 0xf8f8f8, 0x3cbcfc, 0x6888fc, 0x9878f8, 0xf878f8, 0xf85898, 0xf87858, 0xfca044, 0xf8b800, 0xb8f818, 0x58d854, 0x58f898, 0x00e8d8, 0x787878, 0x000000, 0x000000, 0xfcfcfc, 0xa4e4fc, 0xb8b8f8, 0xd8b8f8, 0xf8b8f8, 0xf8a4c0, 0xf0d0b0, 0xfce0a8, 0xf8d878, 0xd8f878, 0xb8f8b8, 0xb8f8d8, 0x00fcfc, 0xf8d8f8, 0x000000, 0x000000 ];
 
 class TetrisBus implements BusInterface {
     frames: number = 0;
@@ -63,8 +65,6 @@ class TetrisBus implements BusInterface {
         }
 
         if (address === 0x4016) {
-            // joypad
-            // console.log(
             const isDown = buttonIsDown(this.joyIndex);
             this.joyIndex = (this.joyIndex + 1) % 8;
             return isDown;
@@ -125,6 +125,11 @@ class TetrisBus implements BusInterface {
         }
         if ((address >= 0x4000 && address <= 0x4015) || address === 0x4017) {
             // APU
+            return;
+        }
+
+        if (address >= 0x8000 && address <= 0x9FFF) {
+            // MMC1 Control
             return;
         }
 
@@ -193,21 +198,19 @@ const interval = setInterval(() => {
         bus.nametableDirty = false;
         renderBG();
     }
+    renderSprites();
 
     if (++bus.frames > 6) {
         // clearInterval(interval);
     }
 }, 1);
 
-// screen
+// RENDER
 
-const canvas = document.body.appendChild(document.createElement('canvas'));
-
-canvas.width = 256;
-canvas.height = 240;
-const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-
-const colors = [ 0x7c7c7c, 0x0000fc, 0x0000bc, 0x4428bc, 0x940084, 0xa80020, 0xa81000, 0x881400, 0x503000, 0x007800, 0x006800, 0x005800, 0x004058, 0x000000, 0x000000, 0x000000, 0xbcbcbc, 0x0078f8, 0x0058f8, 0x6844fc, 0xd800cc, 0xe40058, 0xf83800, 0xe45c10, 0xac7c00, 0x00b800, 0x00a800, 0x00a844, 0x008888, 0x000000, 0x000000, 0x000000, 0xf8f8f8, 0x3cbcfc, 0x6888fc, 0x9878f8, 0xf878f8, 0xf85898, 0xf87858, 0xfca044, 0xf8b800, 0xb8f818, 0x58d854, 0x58f898, 0x00e8d8, 0x787878, 0x000000, 0x000000, 0xfcfcfc, 0xa4e4fc, 0xb8b8f8, 0xd8b8f8, 0xf8b8f8, 0xf8a4c0, 0xf0d0b0, 0xfce0a8, 0xf8d878, 0xd8f878, 0xb8f8b8, 0xb8f8d8, 0x00fcfc, 0xf8d8f8, 0x000000, 0x000000 ];
+const screen = document.body.appendChild(document.createElement('canvas'));
+screen.width = 256;
+screen.height = 240;
+const ctx = screen.getContext('2d') as CanvasRenderingContext2D;
 
 // https://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
 const paletteDebug = document.body.appendChild(document.createElement('div'));
@@ -235,8 +238,8 @@ function renderBG() {
             paletteDebug.appendChild(box);
         });
 
-    for (let y = 0; y < canvas.height / 8; y++) {
-        for (let x = 0; x < canvas.width / 8; x++) {
+    for (let y = 0; y < screen.height / 8; y++) {
+        for (let x = 0; x < screen.width / 8; x++) {
             const tile = VRAM[0x2000 + cursor++];
 
             const attrIndex =
@@ -285,6 +288,32 @@ function renderBG() {
         }
     }
 }
+
+const sprites = document.body.appendChild(document.createElement('canvas'));
+sprites.width = 256;
+sprites.height = 240;
+const spCtx = sprites.getContext('2d') as CanvasRenderingContext2D;
+
+function renderSprites() {
+    spCtx.clearRect(0, 0, sprites.width, sprites.height);
+    const oam = [...RAM.slice(0x200, 0x300)];
+    const palettes = [
+        VRAM.slice(0x3f00, 0x3f04),
+        VRAM.slice(0x3f04, 0x3f08),
+        VRAM.slice(0x3f08, 0x3f0c),
+        VRAM.slice(0x3f0c, 0x3f10),
+    ];
+    let s = 0;
+    while (oam.length) {
+        const [y, t, a, x] = oam.splice(0, 4);
+        if (a !== 0 && a !== 0xFF) { // assume attribute of X is bad
+            s++;
+        }
+    }
+    console.log(s);
+}
+
+// DEBUG
 
 const debug = document.body.appendChild(document.createElement('pre'));
 

@@ -8,8 +8,8 @@ const keymap: {[key: string] : number} = {};
 [
     ['x', 'X', '.', '>', ' '], // A
     ['z', 'Z', ',', '<'], // B
-    ['Shift'], // select
-    ['Enter'], // start
+    ['Shift', 'c', 'C'], // select
+    ['Enter', 'v', 'V'], // start
     ['ArrowUp', 'w', 'W'], // U
     ['ArrowDown', 's', 'S'], // D
     ['ArrowLeft', 'a', 'A'], // L
@@ -34,6 +34,5 @@ html.addEventListener('keyup', e => {
 });
 
 export default function buttonIsDown(index: number) {
-    // console.log(index, controls.has(index))
     return controls.has(index);
 }
