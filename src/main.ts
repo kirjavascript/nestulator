@@ -27,6 +27,8 @@ class TetrisBus implements BusInterface {
     nmiEnabled: boolean = true;
     ppuAddr: number = 0;
     ppuAddrIndex: number = 0;
+    chr0: number = 0;
+    chr0Index: number = 0;
     nametableDirty: boolean = false;
     // chrPointer
     read(address: number) {
@@ -113,7 +115,13 @@ class TetrisBus implements BusInterface {
             return;
         }
 
-        if (address === 0xbfff) return; // ChangeCHRBank0
+        if (address === 0xbfff) {
+            if (this.chr0Index === 0) {
+                this.chr0 = value;
+            }
+            this.chr0Index = (this.chr0Index + 1) % 5;
+            return; // ChangeCHRBank0
+        }
         if (address === 0xdfff) return; // ChangeCHRBank1
         // if (address === 0xDFFF) {
         //     console.error('ChangeCHRBank1', value);
@@ -229,7 +237,7 @@ function renderBG() {
             const paletteLine = (attr >> shift) & 0b11;
             const palette = palettes[paletteLine];
 
-            const chrOff = tile * 0x10;
+            const chrOff = (tile * 0x10) + (bus.chr0 * 0x1000);
             const chrData = CHR.slice(chrOff, chrOff + 0x10);
 
             // TODO: cache this stuff
@@ -280,7 +288,7 @@ const debug = document.body.appendChild(document.createElement('pre'));
 
 function debugRAM() {
     const lines = [];
-    const d = [...VRAM];
+    const d = [...RAM];
     for (let cursor = 0; d.length; cursor += 16) {
         lines.push(
             `0x${cursor.toString(16).padStart(4, '0')}: ` +
