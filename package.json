@@ -1,7 +1,7 @@
 {
     "scripts": {
-        "watch": "esbuild main.ts --bundle --watch --outfile=static/bundle.js --loader:.nes=binary",
-        "build": "esbuild main.ts --bundle --minify --outfile=static/bundle.js --loader:.nes=binary"
+        "watch": "esbuild src/main.ts --bundle --watch --outfile=static/bundle.js --loader:.nes=binary",
+        "build": "esbuild src/main.ts --bundle --minify --outfile=static/bundle.js --loader:.nes=binary"
     },
     "devDependencies": {
         "6502.ts": "^1.0.4",
