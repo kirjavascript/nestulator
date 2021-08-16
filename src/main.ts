@@ -228,20 +228,15 @@ function renderBG() {
         for (let x = 0; x < canvas.width / 8; x++) {
             const tile = VRAM[0x2000 + cursor++];
 
+            // TODO /2*8 === *4
             const attrIndex = Math.floor(x / 2) + (Math.floor(y/2) * 8) + 0x23c0;
             const attr = VRAM[attrIndex];
             const shift = ((x & 1) * 2) + ((y & 1) * 4);
             const paletteLine = (attr >> shift) & 0b11;
             const palette = palettes[paletteLine];
-            // console.log(palette, paletteLine);
 
             const chrOff = tile * 0x10;
             const chrData = CHR.slice(chrOff, chrOff + 0x10);
-
-            if (bus.frames === 6) {
-
-            // console.log(x, y, attr, attrIndex.toString(16));
-            }
 
             // TODO: cache this stuff
             const pixels = [];
@@ -249,12 +244,19 @@ function renderBG() {
                 const high = chrData[i].toString(2).padStart(8, '0');
                 const low = chrData[i + 8].toString(2).padStart(8, '0');
                 for (let j = 0; j < 8; j++) {
-                    pixels.push(parseInt(high[j] + low[j], 2));
+                    pixels.push(parseInt(low[j] + high[j], 2));
                 }
             }
             const imageData = ctx.createImageData(8, 8);
 
             const greyscale = false;
+
+            if (bus.frames === 6) {
+
+            // console.log(paletteLine);
+            // console.log(x, y, attr, attrIndex.toString(16));
+            console.log(pixels+[]);
+            }
 
             pixels.forEach((pixel, i) => {
                 if (greyscale) {
