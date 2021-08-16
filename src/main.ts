@@ -3,6 +3,8 @@ import BusInterface from '6502.ts/lib/machine/bus/BusInterface';
 import Disassembler from '6502.ts/lib/machine/cpu/Disassembler';
 import tetrisROM from '../tetris.nes';
 
+import buttonIsDown from './joypad';
+
 // fast and accurate (with hacks)
 // foxNES/CTMulator
 
@@ -29,6 +31,7 @@ class TetrisBus implements BusInterface {
     ppuAddrIndex: number = 0;
     chr0: number = 0;
     chr0Index: number = 0;
+    joyIndex: number = 0;
     nametableDirty: boolean = false;
     // chrPointer
     read(address: number) {
@@ -54,10 +57,20 @@ class TetrisBus implements BusInterface {
             return this.vblank ? 0x40 : 0;
         }
 
-        if (address === 0x4016 || address === 0x4017) {
-            // joypad
+        if ((address >= 0x4000 && address <= 0x4015) || address === 0x4017) {
+            // APU
             return;
         }
+
+        if (address === 0x4016) {
+            // joypad
+            // console.log(
+            const isDown = buttonIsDown(this.joyIndex);
+            this.joyIndex = (this.joyIndex + 1) % 8;
+            return isDown;
+        }
+
+        if (address === 0x4017) return; // joypad2
 
         console.log(['last', Number(cpu.state.p).toString(16)]);
         console.error('read', address.toString(16));
@@ -123,10 +136,6 @@ class TetrisBus implements BusInterface {
             return; // ChangeCHRBank0
         }
         if (address === 0xdfff) return; // ChangeCHRBank1
-        // if (address === 0xDFFF) {
-        //     console.error('ChangeCHRBank1', value);
-        //     return;
-        // }
 
         console.log(['last', Number(cpu.state.p).toString(16)]);
         console.error('write', address.toString(16), value.toString(16));
@@ -252,13 +261,6 @@ function renderBG() {
             const imageData = ctx.createImageData(8, 8);
 
             const greyscale = false;
-
-            if (bus.frames === 6) {
-                // console.log(shift)
-                // console.log(paletteLine);
-                // console.log(x, y, attr, attrIndex.toString(16));
-                // console.log(pixels+[]);
-            }
 
             pixels.forEach((pixel, i) => {
                 if (greyscale) {
