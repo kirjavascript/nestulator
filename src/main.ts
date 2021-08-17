@@ -184,6 +184,8 @@ const interval = setInterval(() => {
 
     renderSprites(); // TODO: cache
 
+    renderBG();
+
     for (let i = 0; i < nmiCycles; i++) {
         if (cpu.executionState === 1) {
             // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
@@ -195,7 +197,6 @@ const interval = setInterval(() => {
 
 
     debugRAM();
-    renderBG();
 
     if (++bus.frames > 6) {
         // clearInterval(interval);
@@ -314,6 +315,7 @@ function renderSprites() {
         // assume attributes like this are bad
         if (tile !== 0xFF && tile !== 0xEF && x !== 0 && attr !== 0xFF) {
             const palette = palettes[attr & 0b11];
+            const vflip = attr & 0b1000000;
 
             // TODO: dedupe
             const chrOff = (tile * 0x10) + (bus.chr0 * 0x1000);
@@ -331,7 +333,9 @@ function renderSprites() {
 
             const greyscale = false;
 
-            pixels.forEach((pixel, i) => {
+            const pixelList = vflip ? pixels.reverse() : pixels;
+
+            pixelList.forEach((pixel, i) => {
                 if (pixel !== 0) { // can ignore transparent pixels
                     if (greyscale) {
                         imageData.data[i * 4 + 0] = 85 * pixel;
@@ -347,7 +351,9 @@ function renderSprites() {
                 imageData.data[i * 4 + 3] = 255;
             });
 
-            spCtx.putImageData(imageData, x === 255 ? 40 : x, y + 1);
+            const yOffset = vflip ? y : y + 1;
+
+            spCtx.putImageData(imageData, x, yOffset);
         }
     }
 }
