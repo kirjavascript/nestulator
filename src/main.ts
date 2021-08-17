@@ -1,15 +1,14 @@
 import tetrisROM from '../tetris.nes';
 import { paletteHex, paletteRGB } from './colors';
-import NES from './nes';
+import NES, { Region } from './nes';
 
-const { bus, cpu, VRAM, RAM, CHR } = new NES(tetrisROM);
+const { region, bus, cpu, VRAM, RAM, CHR } = new NES(tetrisROM);
 
 
 // fast and accurate (with hacks)
 // foxNES/CTMulator
 
 // TODO: timing
-// TODO: PAL
 // TODO: audio
 // TODO: localstorage / drag
 // TODO: demo
@@ -203,9 +202,10 @@ function debugRAM() {
 // LOOP
 
 const nmiCycles = 2273;
+const baseCycles = region === Region.PAL ? 33247 : 29780;
 
 function frame(shouldRender: boolean) {
-    const totalCycles = 29780 + (bus.frames & 1); // NTSC
+    const totalCycles = 29780 + (bus.frames & 1);
 
     bus.vblank = false;
 
@@ -223,7 +223,7 @@ function frame(shouldRender: boolean) {
         bus.vblank = true;
     }
 
-    renderSprites(); // TODO: cache
+    shouldRender && renderSprites(); // TODO: cache
 
     for (let i = 0; i < nmiCycles; i++) {
         if (cpu.executionState === 1) {
@@ -234,7 +234,7 @@ function frame(shouldRender: boolean) {
         // if no nmi, break
     }
 
-    renderBG();
+    shouldRender && renderBG();
 
     debugRAM();
 
@@ -244,13 +244,13 @@ function frame(shouldRender: boolean) {
 }
 let stop = false;
 
-// 60.0988
+// TODO: fix performance issues when tabbing away
+const frameRate = region === Region.PAL ? 0.0500069 : 0.0600988;
 const epoch = performance.now();
 const loop = () => {
     !stop && requestAnimationFrame(loop);
     const diff = performance.now() - epoch;
-    const frames = diff * 0.06 | 0;
-    // console.log(bus.frames, frames);
+    const frames = diff * frameRate | 0;
     if (frames > bus.frames) {
         for (let i = 0; i < frames - bus.frames; i++) {
             frame(false);

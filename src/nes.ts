@@ -1,7 +1,7 @@
 import StateMachineCpu from '6502.ts/lib/machine/cpu/StateMachineCpu';
 import TetrisBus from './bus';
 
-enum Region {
+export enum Region {
     NTSC,
     PAL,
     GYM,
