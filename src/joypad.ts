@@ -6,8 +6,8 @@ window.addEventListener('focus', () => { controls.clear(); });
 const keymap: {[key: string] : number} = {};
 
 [
-    ['x', 'X', '.', '>', ' '], // A
-    ['z', 'Z', ',', '<'], // B
+    ['x', 'X', 'm', 'M'], // A
+    ['z', 'Z', 'n', 'N'], // B
     ['Shift', 'c', 'C'], // select
     ['Enter', 'v', 'V'], // start
     ['ArrowUp', 'w', 'W'], // U
