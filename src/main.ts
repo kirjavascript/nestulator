@@ -4,6 +4,7 @@ import NES from './nes';
 
 const { bus, cpu, VRAM, RAM, CHR } = new NES(tetrisROM);
 
+
 // fast and accurate (with hacks)
 // foxNES/CTMulator
 
@@ -20,6 +21,9 @@ const { bus, cpu, VRAM, RAM, CHR } = new NES(tetrisROM);
 
 // const PAL = false;
 // const _header = tetrisROM.slice(0, 0x10);
+
+// SOCD / runahead discussion
+// https://discord.com/channels/374368504465457153/577489649493213185/877303108626178078
 
 
 const nmiCycles = 2273;

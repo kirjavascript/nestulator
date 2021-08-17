@@ -16,7 +16,6 @@ export default class TetrisBus implements BusInterface {
     backgroundDisplay: boolean = true;
     constructor(nes: NES) {
         this.nes = nes;
-        console.log(1)
     }
     read(address: number): number {
         // vectors
