@@ -8,14 +8,15 @@ import buttonIsDown from './joypad';
 // fast and accurate (with hacks)
 // foxNES/CTMulator
 
-// TODO: sprites
+// TODO: sprite flipping
+// TODO: PPUMASK for pause
+// TODO: refactor everything
 // TODO: audio
 //
 // TODO: runahead
 // TODO: background and sprites on different canvases
 // TODO: block tool
 // TODO: timestamps, security via obscurity
-// TODO: refactor everything
 
 // const PAL = false;
 // const _header = tetrisROM.slice(0, 0x10);
@@ -35,7 +36,6 @@ class TetrisBus implements BusInterface {
     chr0Index: number = 0;
     joyIndex: number = 0;
     nametableDirty: boolean = false;
-    // chrPointer
     read(address: number) {
         // vectors
         if (address === 0xfffa) return 0x05; // nmi
@@ -182,6 +182,8 @@ const interval = setInterval(() => {
         bus.vblank = true;
     }
 
+    renderSprites();
+
     for (let i = 0; i < nmiCycles; i++) {
         if (cpu.executionState === 1) {
             // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
@@ -191,6 +193,7 @@ const interval = setInterval(() => {
         // if no nmi, break
     }
 
+
     // check interrupts
 
     debugRAM();
@@ -198,7 +201,6 @@ const interval = setInterval(() => {
         bus.nametableDirty = false;
         renderBG();
     }
-    renderSprites();
 
     if (++bus.frames > 6) {
         // clearInterval(interval);
@@ -207,10 +209,13 @@ const interval = setInterval(() => {
 
 // RENDER
 
-const screen = document.body.appendChild(document.createElement('canvas'));
-screen.width = 256;
-screen.height = 240;
-const ctx = screen.getContext('2d') as CanvasRenderingContext2D;
+const screen = document.body.appendChild(document.createElement('div'));
+screen.className = 'screen';
+
+const background = screen.appendChild(document.createElement('canvas'));
+background.width = 256;
+background.height = 240;
+const ctx = background.getContext('2d') as CanvasRenderingContext2D;
 
 // https://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
 const paletteDebug = document.body.appendChild(document.createElement('div'));
@@ -238,8 +243,8 @@ function renderBG() {
             paletteDebug.appendChild(box);
         });
 
-    for (let y = 0; y < screen.height / 8; y++) {
-        for (let x = 0; x < screen.width / 8; x++) {
+    for (let y = 0; y < background.height / 8; y++) {
+        for (let x = 0; x < background.width / 8; x++) {
             const tile = VRAM[0x2000 + cursor++];
 
             const attrIndex =
@@ -289,7 +294,7 @@ function renderBG() {
     }
 }
 
-const sprites = document.body.appendChild(document.createElement('canvas'));
+const sprites = screen.appendChild(document.createElement('canvas'));
 sprites.width = 256;
 sprites.height = 240;
 const spCtx = sprites.getContext('2d') as CanvasRenderingContext2D;
@@ -298,19 +303,50 @@ function renderSprites() {
     spCtx.clearRect(0, 0, sprites.width, sprites.height);
     const oam = [...RAM.slice(0x200, 0x300)];
     const palettes = [
-        VRAM.slice(0x3f00, 0x3f04),
-        VRAM.slice(0x3f04, 0x3f08),
-        VRAM.slice(0x3f08, 0x3f0c),
-        VRAM.slice(0x3f0c, 0x3f10),
+        VRAM.slice(0x3f10, 0x3f14),
+        VRAM.slice(0x3f14, 0x3f18),
+        VRAM.slice(0x3f18, 0x3f1c),
+        VRAM.slice(0x3f1c, 0x3f20),
     ];
-    let s = 0;
     while (oam.length) {
-        const [y, t, a, x] = oam.splice(0, 4);
-        if (a !== 0 && a !== 0xFF) { // assume attribute of X is bad
-            s++;
+        const [y, tile, attr, x] = oam.splice(0, 4);
+        // assume attribute like this are bad
+        if (tile !== 0xFF && tile !== 0xEF && x !== 0 && attr !== 0xFF) {
+            const palette = palettes[attr & 0b11];
+
+            // TODO: dedupe
+            const chrOff = (tile * 0x10) + (bus.chr0 * 0x1000);
+            const chrData = CHR.slice(chrOff, chrOff + 0x10);
+
+            const pixels = [];
+            for (let i = 0; i < 8; i++) {
+                const high = chrData[i].toString(2).padStart(8, '0');
+                const low = chrData[i + 8].toString(2).padStart(8, '0');
+                for (let j = 0; j < 8; j++) {
+                    pixels.push(parseInt(low[j] + high[j], 2));
+                }
+            }
+            const imageData = ctx.createImageData(8, 8);
+
+            const greyscale = false;
+
+            pixels.forEach((pixel, i) => {
+                if (greyscale) {
+                    imageData.data[i * 4 + 0] = 85 * pixel;
+                    imageData.data[i * 4 + 1] = 85 * pixel;
+                    imageData.data[i * 4 + 2] = 85 * pixel;
+                } else {
+                    const color = colors[palette[pixel]];
+                    imageData.data[i * 4 + 0] = color >> 16;
+                    imageData.data[i * 4 + 1] = (color >> 8) & 0xff;
+                    imageData.data[i * 4 + 2] = color & 0xff;
+                }
+                imageData.data[i * 4 + 3] = 255;
+            });
+
+            spCtx.putImageData(imageData, x === 255 ? 40 : x, y + 1);
         }
     }
-    console.log(s);
 }
 
 // DEBUG

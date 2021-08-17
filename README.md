@@ -1,5 +1,7 @@
 nestris emulator, just for fun
 
+goals: fast & accurate
+
 TODO:
 
 support in-game only high level runahead  
