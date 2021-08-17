@@ -8,8 +8,6 @@ import buttonIsDown from './joypad';
 // fast and accurate (with hacks)
 // foxNES/CTMulator
 
-// TODO: sprite flipping
-// TODO: PPUMASK for pause
 // TODO: refactor everything
 // TODO: timing
 // TODO: PAL
@@ -36,6 +34,7 @@ class TetrisBus implements BusInterface {
     chr0Index: number = 0;
     joyIndex: number = 0;
     backgroundDirty: boolean = false;
+    backgroundDisplay: boolean = true;
     read(address: number) {
         // vectors
         if (address === 0xfffa) return 0x05; // nmi
@@ -90,7 +89,12 @@ class TetrisBus implements BusInterface {
             return;
         }
         if (address === 0x2001) {
-            // PPUMASK, ignore
+            // PPUMASK
+            const showBackground = Boolean(value & 0b1000);
+            if (showBackground !== this.backgroundDisplay) {
+                this.backgroundDirty = true;
+            }
+            this.backgroundDisplay = showBackground;
             return;
         }
         if (address === 0x2003) {
@@ -221,6 +225,10 @@ paletteDebug.style.display = 'flex';
 function renderBG() {
     if (!bus.backgroundDirty) return;
     bus.backgroundDirty = false;
+    if (!bus.backgroundDisplay) {
+        ctx.clearRect(0, 0, background.width, background.height);
+        return;
+    }
 
 
     const palettes = [
@@ -315,7 +323,7 @@ function renderSprites() {
         // assume attributes like this are bad
         if (tile !== 0xFF && tile !== 0xEF && x !== 0 && attr !== 0xFF) {
             const palette = palettes[attr & 0b11];
-            const vflip = attr & 0b1000000;
+            const vflip = Boolean(attr & 0b1000000);
 
             // TODO: dedupe
             const chrOff = (tile * 0x10) + (bus.chr0 * 0x1000);
