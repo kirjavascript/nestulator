@@ -10,6 +10,7 @@ import buttonIsDown from './joypad';
 
 // TODO: refactor everything
 // TODO: timing
+// TODO: demo
 // TODO: PAL
 // TODO: audio
 //
@@ -215,7 +216,6 @@ screen.className = 'screen';
 const background = screen.appendChild(document.createElement('canvas'));
 background.width = 256;
 background.height = 240;
-background.style.backgroundColor = 'black';
 const ctx = background.getContext('2d') as CanvasRenderingContext2D;
 
 // https://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
@@ -230,13 +230,14 @@ function renderBG() {
         return;
     }
 
-
     const palettes = [
         VRAM.slice(0x3f00, 0x3f04),
         VRAM.slice(0x3f04, 0x3f08),
         VRAM.slice(0x3f08, 0x3f0c),
         VRAM.slice(0x3f0c, 0x3f10),
     ];
+
+    background.style.backgroundColor = '#' + String(colors[palettes[0][0]]).padStart(6, '0').toString(16);
 
     paletteDebug.innerHTML = '';
     palettes
