@@ -8,10 +8,8 @@ const { bus, cpu, VRAM, RAM, CHR } = new NES(tetrisROM);
 // fast and accurate (with hacks)
 // foxNES/CTMulator
 
-// TODO: refactor everything
 // TODO: timing
-// TODO: PAL hash region detection
-// TODO: gym title region detection
+// TODO: PAL
 // TODO: audio
 // TODO: localstorage / drag
 // TODO: demo
@@ -19,55 +17,8 @@ const { bus, cpu, VRAM, RAM, CHR } = new NES(tetrisROM);
 // TODO: runahead
 // TODO: timestamps, security via obscurity
 
-// const PAL = false;
-// const _header = tetrisROM.slice(0, 0x10);
-
 // SOCD / runahead discussion
 // https://discord.com/channels/374368504465457153/577489649493213185/877303108626178078
-
-
-const nmiCycles = 2273;
-
-
-const interval = setInterval(() => {
-    const totalCycles = 29780 + (bus.frames & 1); // NTSC
-
-    bus.vblank = false;
-
-    for (let i = 0; i < totalCycles - nmiCycles; i++) {
-        if (cpu.executionState === 1) {
-            // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
-        }
-        cpu.cycle();
-        // optimization if (checkForNMI) break
-        // TODO: instead of running x number, of cycles, skip from the rom to vblank
-    }
-
-    if (bus.nmiEnabled) {
-        cpu.nmi();
-        bus.vblank = true;
-    }
-
-    renderSprites(); // TODO: cache
-
-    renderBG();
-
-    for (let i = 0; i < nmiCycles; i++) {
-        if (cpu.executionState === 1) {
-            // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
-        }
-
-        cpu.cycle();
-        // if no nmi, break
-    }
-
-
-    debugRAM();
-
-    if (++bus.frames > 6) {
-        // clearInterval(interval);
-    }
-}, 1);
 
 // RENDER
 
@@ -79,7 +30,6 @@ background.width = 256;
 background.height = 240;
 const ctx = background.getContext('2d') as CanvasRenderingContext2D;
 
-// https://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
 const paletteDebug = document.body.appendChild(document.createElement('div'));
 paletteDebug.style.display = 'flex';
 
@@ -249,3 +199,64 @@ function debugRAM() {
         bus.frames
     }\n${lines.join('\n')}`;
 }
+
+// LOOP
+
+const nmiCycles = 2273;
+
+function frame(shouldRender: boolean) {
+    const totalCycles = 29780 + (bus.frames & 1); // NTSC
+
+    bus.vblank = false;
+
+    for (let i = 0; i < totalCycles - nmiCycles; i++) {
+        if (cpu.executionState === 1) {
+            // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
+        }
+        cpu.cycle();
+        // optimization if (checkForNMI) break
+        // TODO: instead of running x number, of cycles, skip from the rom to vblank
+    }
+
+    if (bus.nmiEnabled) {
+        cpu.nmi();
+        bus.vblank = true;
+    }
+
+    renderSprites(); // TODO: cache
+
+    for (let i = 0; i < nmiCycles; i++) {
+        if (cpu.executionState === 1) {
+            // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
+        }
+
+        cpu.cycle();
+        // if no nmi, break
+    }
+
+    renderBG();
+
+    debugRAM();
+
+    if (++bus.frames > 10) {
+        // stop = true;
+    }
+}
+let stop = false;
+
+// 60.0988
+const epoch = performance.now();
+const loop = () => {
+    !stop && requestAnimationFrame(loop);
+    const diff = performance.now() - epoch;
+    const frames = diff * 0.06 | 0;
+    // console.log(bus.frames, frames);
+    if (frames > bus.frames) {
+        for (let i = 0; i < frames - bus.frames; i++) {
+            frame(false);
+        }
+    }
+    frame(true);
+};
+
+loop();
