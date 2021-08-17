@@ -11,11 +11,11 @@ import buttonIsDown from './joypad';
 // TODO: sprite flipping
 // TODO: PPUMASK for pause
 // TODO: refactor everything
+// TODO: timing
+// TODO: PAL
 // TODO: audio
 //
 // TODO: runahead
-// TODO: background and sprites on different canvases
-// TODO: block tool
 // TODO: timestamps, security via obscurity
 
 // const PAL = false;
@@ -35,7 +35,7 @@ class TetrisBus implements BusInterface {
     chr0: number = 0;
     chr0Index: number = 0;
     joyIndex: number = 0;
-    nametableDirty: boolean = false;
+    backgroundDirty: boolean = false;
     read(address: number) {
         // vectors
         if (address === 0xfffa) return 0x05; // nmi
@@ -113,8 +113,8 @@ class TetrisBus implements BusInterface {
         if (address === 0x2007) {
             const addr = this.ppuAddr & 0x3fff;
             VRAM[addr] = value;
-            if (!this.nametableDirty && addr >= 0x2000 && addr < 0x2fc0) {
-                this.nametableDirty = true;
+            if (!this.backgroundDirty && addr >= 0x2000 && addr < 0x2fc0) {
+                this.backgroundDirty = true;
             }
             this.ppuAddr++;
             return;
@@ -182,7 +182,7 @@ const interval = setInterval(() => {
         bus.vblank = true;
     }
 
-    renderSprites();
+    renderSprites(); // TODO: cache
 
     for (let i = 0; i < nmiCycles; i++) {
         if (cpu.executionState === 1) {
@@ -194,13 +194,8 @@ const interval = setInterval(() => {
     }
 
 
-    // check interrupts
-
     debugRAM();
-    if (bus.frames !== 0 && bus.nametableDirty) {
-        bus.nametableDirty = false;
-        renderBG();
-    }
+    renderBG();
 
     if (++bus.frames > 6) {
         // clearInterval(interval);
@@ -215,6 +210,7 @@ screen.className = 'screen';
 const background = screen.appendChild(document.createElement('canvas'));
 background.width = 256;
 background.height = 240;
+background.style.backgroundColor = 'black';
 const ctx = background.getContext('2d') as CanvasRenderingContext2D;
 
 // https://emulation.gametechwiki.com/index.php/Famicom_Color_Palette
@@ -222,7 +218,9 @@ const paletteDebug = document.body.appendChild(document.createElement('div'));
 paletteDebug.style.display = 'flex';
 
 function renderBG() {
-    let cursor = 0;
+    if (!bus.backgroundDirty) return;
+    bus.backgroundDirty = false;
+
 
     const palettes = [
         VRAM.slice(0x3f00, 0x3f04),
@@ -243,6 +241,7 @@ function renderBG() {
             paletteDebug.appendChild(box);
         });
 
+    let cursor = 0;
     for (let y = 0; y < background.height / 8; y++) {
         for (let x = 0; x < background.width / 8; x++) {
             const tile = VRAM[0x2000 + cursor++];
@@ -271,17 +270,19 @@ function renderBG() {
             const greyscale = false;
 
             pixels.forEach((pixel, i) => {
-                if (greyscale) {
-                    imageData.data[i * 4 + 0] = 85 * pixel;
-                    imageData.data[i * 4 + 1] = 85 * pixel;
-                    imageData.data[i * 4 + 2] = 85 * pixel;
-                } else {
-                    const color = colors[palette[pixel]];
-                    imageData.data[i * 4 + 0] = color >> 16;
-                    imageData.data[i * 4 + 1] = (color >> 8) & 0xff;
-                    imageData.data[i * 4 + 2] = color & 0xff;
+                if (pixel !== 0) { // can ignore transparent pixels
+                    if (greyscale) {
+                        imageData.data[i * 4 + 0] = 85 * pixel;
+                        imageData.data[i * 4 + 1] = 85 * pixel;
+                        imageData.data[i * 4 + 2] = 85 * pixel;
+                    } else {
+                        const color = colors[palette[pixel]];
+                        imageData.data[i * 4 + 0] = color >> 16;
+                        imageData.data[i * 4 + 1] = (color >> 8) & 0xff;
+                        imageData.data[i * 4 + 2] = color & 0xff;
+                    }
+                    imageData.data[i * 4 + 3] = 255;
                 }
-                imageData.data[i * 4 + 3] = 255;
             });
 
             ctx.putImageData(imageData, x * 8, y * 8);
@@ -310,7 +311,7 @@ function renderSprites() {
     ];
     while (oam.length) {
         const [y, tile, attr, x] = oam.splice(0, 4);
-        // assume attribute like this are bad
+        // assume attributes like this are bad
         if (tile !== 0xFF && tile !== 0xEF && x !== 0 && attr !== 0xFF) {
             const palette = palettes[attr & 0b11];
 
@@ -331,15 +332,17 @@ function renderSprites() {
             const greyscale = false;
 
             pixels.forEach((pixel, i) => {
-                if (greyscale) {
-                    imageData.data[i * 4 + 0] = 85 * pixel;
-                    imageData.data[i * 4 + 1] = 85 * pixel;
-                    imageData.data[i * 4 + 2] = 85 * pixel;
-                } else {
-                    const color = colors[palette[pixel]];
-                    imageData.data[i * 4 + 0] = color >> 16;
-                    imageData.data[i * 4 + 1] = (color >> 8) & 0xff;
-                    imageData.data[i * 4 + 2] = color & 0xff;
+                if (pixel !== 0) { // can ignore transparent pixels
+                    if (greyscale) {
+                        imageData.data[i * 4 + 0] = 85 * pixel;
+                        imageData.data[i * 4 + 1] = 85 * pixel;
+                        imageData.data[i * 4 + 2] = 85 * pixel;
+                    } else {
+                        const color = colors[palette[pixel]];
+                        imageData.data[i * 4 + 0] = color >> 16;
+                        imageData.data[i * 4 + 1] = (color >> 8) & 0xff;
+                        imageData.data[i * 4 + 2] = color & 0xff;
+                    }
                 }
                 imageData.data[i * 4 + 3] = 255;
             });
