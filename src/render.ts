@@ -74,20 +74,7 @@ export function renderBG(nes: NES) {
             const paletteLine = (attr >> shift) & 0b11;
             const palette = palettes[paletteLine];
 
-            const chrOff = (tile * 0x10) + (bus.chr0 * 0x1000);
-            const chrData = CHR.slice(chrOff, chrOff + 0x10);
-
-            // TODO: cache this stuff
-            const pixels = [];
-            for (let i = 0; i < 8; i++) {
-                const high = chrData[i].toString(2).padStart(8, '0');
-                const low = chrData[i + 8].toString(2).padStart(8, '0');
-                for (let j = 0; j < 8; j++) {
-                    pixels.push(parseInt(low[j] + high[j], 2));
-                }
-            }
-
-            // const pixels = nes.tiles[];
+            const pixels = nes.tiles[tile + (bus.chr0 * 0x100)];
             const imageData = ctx.createImageData(8, 8); // TODO: reuse
 
             const greyscale = false;

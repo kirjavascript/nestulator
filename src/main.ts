@@ -40,7 +40,6 @@ function frame(shouldRender: boolean) {
 
     if (shouldRender) {
         renderSprites(nes);
-        renderBG(nes);
     }
 
     if (nes.bus.nmiEnabled) {
@@ -51,6 +50,10 @@ function frame(shouldRender: boolean) {
     for (let i = 0; i < nmiCycles; i++) {
         nes.cpu.cycle();
         // TODO: potentially break here
+    }
+
+    if (shouldRender) {
+        renderBG(nes);
     }
 
     nes.bus.frames++;
