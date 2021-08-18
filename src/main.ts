@@ -211,24 +211,34 @@ const baseCycles = region === Region.PAL ? 33247 : 29780;
 
 function frame(shouldRender: boolean) {
     const totalCycles = baseCycles + (bus.frames & 1);
+    // if (bus.frames > 10) return;
 
+    bus.nmiChecked = false;
     bus.vblank = false;
+
 
     for (let i = 0; i < totalCycles - nmiCycles; i++) {
         if (cpu.executionState === 1) {
             // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
         }
         cpu.cycle();
+        if (bus.nmiChecked === true) {
+            break;
+        }
         // optimization if (checkForNMI) break
         // TODO: instead of running x number, of cycles, skip from the rom to vblank
     }
+
+    // TODO: find when sprites should render
+    shouldRender && renderSprites(); // TODO: cache
+
+    // console.log(cpu.state.p.toString(16))
 
     if (bus.nmiEnabled) {
         cpu.nmi();
         bus.vblank = true;
     }
 
-    shouldRender && renderSprites(); // TODO: cache
 
     for (let i = 0; i < nmiCycles; i++) {
         if (cpu.executionState === 1) {
@@ -241,7 +251,7 @@ function frame(shouldRender: boolean) {
 
     shouldRender && renderBG();
 
-    debugRAM();
+    // debugRAM();
 
     bus.frames++;
 }
@@ -252,62 +262,30 @@ function frame(shouldRender: boolean) {
 // get mecex to check
 const frameRate = region === Region.PAL ? 0.0500069 : 0.0600988;
 const epoch = performance.now();
+let framesDone = 0;
 const loop = () => {
     requestAnimationFrame(loop);
 
     const diff = performance.now() - epoch;
     const frames = diff * frameRate | 0;
-    const extraFrames = frames - bus.frames;
+    const extraFrames = frames - framesDone;
 
 
     if (document.visibilityState === 'hidden') {
-        bus.frames = frames;
+        framesDone = frames;
     } else if (extraFrames > 10) {
         frame(true);
-        bus.frames = frames;
+        framesDone = frames;
     } else {
         if (extraFrames > 0) {
             for (let i = 0; i < extraFrames; i++) {
                 frame(false);
+                framesDone++;
             }
         }
         frame(true);
-    }
-
-    if (fixedY) {
-        RAM[0x41] = fixedY;
-        RAM[0x61] = fixedY;
-        RAM[0x45] = 0x40;
-        RAM[0x65] = 0x40;
-
+        framesDone++;
     }
     RAM[0xc3] = 0; // skip legal
-
 };
 loop();
-
-screen.addEventListener('click', (e) => {
-    RAM[0x49] = 0
-    RAM[0x69] = 0
-    const [x, y] = [e.clientX-214, e.clientY-230];
-    const target = 0x400 + (x/16.5|0) + ((y/16.5|0) * 10);
-    const current = RAM[target];
-    RAM[target] = current === 0xEF ? 0x7b : 0xEF;
-})
-
-let fixedY = 0;
-
-const b1 =document.body.insertBefore(document.createElement('button'), document.body.firstElementChild)
-b1.textContent = 'next=longbar'
-b1.addEventListener('click', () => { RAM[0xBF] = 0x12; })
-
-
-const b2 =document.body.insertBefore(document.createElement('button'), document.body.firstElementChild)
-b2.textContent = 'current=T'
-b2.addEventListener('click', () => { RAM[0x42] = RAM[0x62]= 0; })
-
-const b3 =document.body.insertBefore(document.createElement('button'), document.body.firstElementChild)
-b3.textContent = 'gravity'
-b3.addEventListener('click', () => {
-    fixedY = fixedY ? 0 : RAM[0x41];
-})

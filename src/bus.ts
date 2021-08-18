@@ -7,6 +7,7 @@ export default class TetrisBus implements BusInterface {
     frames: number = 0;
     vblank: boolean = false;
     nmiEnabled: boolean = true;
+    nmiChecked: boolean = false;
     ppuAddr: number = 0;
     ppuAddrIndex: number = 0;
     chr0: number = 0;
@@ -25,6 +26,12 @@ export default class TetrisBus implements BusInterface {
         if (address === 0xfffd) return 0x80;
         if (address === 0xfffe) return 0x4a; // irq
         if (address === 0xffff) return 0x80;
+
+        if (address === 0x33) {
+            // if the rom is waiting for NMI, just skip to it
+            this.nmiChecked = true;
+            return this.nes.RAM[0x33];
+        }
 
         // RAM
         if (address < 0x2000) {
