@@ -106,7 +106,8 @@ export default class TetrisBus implements BusInterface {
         if (address === 0x2007) {
             const addr = this.ppuAddr & 0x3fff;
             this.nes.VRAM[addr] = value;
-            if (!this.backgroundDirty && addr >= 0x2000 && addr < 0x2fc0) {
+            if (!this.backgroundDirty && ((addr >= 0x2000 && addr < 0x2fc0) || (addr === 0x3f0e))) {
+                // 0x3f0c captures the tetris flashing
                 this.backgroundDirty = true;
             }
             this.ppuAddr++;

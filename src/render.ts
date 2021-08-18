@@ -86,10 +86,13 @@ export function renderBG(nes: NES) {
                     pixels.push(parseInt(low[j] + high[j], 2));
                 }
             }
-            const imageData = ctx.createImageData(8, 8);
+
+            // const pixels = nes.tiles[];
+            const imageData = ctx.createImageData(8, 8); // TODO: reuse
 
             const greyscale = false;
 
+            // TODO: cache this stuff... perhaps
             pixels.forEach((pixel, i) => {
                 if (pixel !== 0) { // can ignore transparent pixels
                     if (greyscale) {

@@ -14,6 +14,7 @@ export default class NES {
     CHR: Uint8Array;
     RAM: Uint8Array;
     VRAM: Uint8Array;
+    tiles: Array<Array<number>>;
     region: Region;
 
     constructor(ROM: Uint8Array) {
@@ -32,6 +33,23 @@ export default class NES {
         } else {
             this.region = Region.GYM;
         }
+
+        this.tiles = [];
+
+        for (let cursor = 0; cursor < this.CHR.length; cursor += 0x10) {
+            const pixels = [];
+            const chrData = this.CHR.slice(cursor, cursor + 0x10);
+            for (let i = 0; i < 8; i++) {
+                const high = chrData[i].toString(2).padStart(8, '0');
+                const low = chrData[i + 8].toString(2).padStart(8, '0');
+                for (let j = 0; j < 8; j++) {
+                    pixels.push(parseInt(low[j] + high[j], 2));
+                }
+            }
+            this.tiles.push(pixels);
+        }
+
+
     }
 
 }

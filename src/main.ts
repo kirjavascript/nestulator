@@ -58,8 +58,6 @@ function frame(shouldRender: boolean) {
 
 const frameCount = document.body.insertBefore(document.createElement('div'), document.body.firstElementChild);
 
-
-// get mecex to check
 const frameRate = nes.region === Region.PAL ? 0.0500069 : 0.0600988;
 const epoch = performance.now();
 let framesDone = 0;
