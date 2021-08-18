@@ -211,54 +211,38 @@ const baseCycles = region === Region.PAL ? 33247 : 29780;
 
 function frame(shouldRender: boolean) {
     const totalCycles = baseCycles + (bus.frames & 1);
-    // if (bus.frames > 10) return;
+    // if (bus.frames > 9) return;
 
     bus.nmiChecked = false;
     bus.vblank = false;
 
-
     for (let i = 0; i < totalCycles - nmiCycles; i++) {
-        if (cpu.executionState === 1) {
-            // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
-        }
         cpu.cycle();
-        if (bus.nmiChecked === true) {
-            break;
-        }
-        // optimization if (checkForNMI) break
-        // TODO: instead of running x number, of cycles, skip from the rom to vblank
+        // if waiting for NMI, skip to it
+        // @ts-ignore
+        if (bus.nmiChecked === true) break;
     }
 
-    // TODO: find when sprites should render
-    shouldRender && renderSprites(); // TODO: cache
-
-    // console.log(cpu.state.p.toString(16))
+    if (shouldRender) {
+        renderSprites();
+        renderBG();
+    }
 
     if (bus.nmiEnabled) {
         cpu.nmi();
         bus.vblank = true;
     }
 
-
     for (let i = 0; i < nmiCycles; i++) {
-        if (cpu.executionState === 1) {
-            // console.log([Number(cpu.state.p).toString(16),  disasm.disassembleAt(cpu.state.p)]);
-        }
-
         cpu.cycle();
-        // if no nmi, break
+        // TODO: potentially break here
     }
-
-    shouldRender && renderBG();
-
-    // debugRAM();
 
     bus.frames++;
 }
 
 
 // TODO: check if NO frames have to be rendered
-// TODO: sep framecount
 // get mecex to check
 const frameRate = region === Region.PAL ? 0.0500069 : 0.0600988;
 const epoch = performance.now();

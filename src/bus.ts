@@ -28,7 +28,7 @@ export default class TetrisBus implements BusInterface {
         if (address === 0xffff) return 0x80;
 
         if (address === 0x33) {
-            // if the rom is waiting for NMI, just skip to it
+            // perf hack: if the rom is waiting for NMI, just skip to it
             this.nmiChecked = true;
             return this.nes.RAM[0x33];
         }

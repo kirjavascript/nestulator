@@ -33,4 +33,5 @@ export default class NES {
             this.region = Region.GYM;
         }
     }
+
 }
