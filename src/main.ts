@@ -6,6 +6,7 @@ const nes = new NES(tetrisROM);
 
 
 // TODO: timing / perf
+// maxout code
 // TODO: audio
 // TODO: localstorage / drag
 // TODO: demo
@@ -22,8 +23,8 @@ const nes = new NES(tetrisROM);
 //https://github.com/binji/binjgb/blob/a4433d9aa7fa6e04e7d3c5ba7d27fb13e653bcae/docs/demo.js#L462
 // LOOP
 
-const nmiCycles = 2273;
 const baseCycles = nes.region === Region.PAL ? 33247 : 29780;
+const nmiCycles = 2273;
 
 function frame(shouldRender: boolean) {
     const totalCycles = baseCycles + (nes.bus.frames & 1);
