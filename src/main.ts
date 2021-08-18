@@ -9,6 +9,7 @@ const { region, bus, cpu, VRAM, RAM, CHR } = new NES(tetrisROM);
 // foxNES/CTMulator
 
 // TODO: timing
+// TODO: blocktool demo
 // TODO: audio
 // TODO: localstorage / drag
 // TODO: demo
@@ -18,6 +19,10 @@ const { region, bus, cpu, VRAM, RAM, CHR } = new NES(tetrisROM);
 
 // SOCD / runahead discussion
 // https://discord.com/channels/374368504465457153/577489649493213185/877303108626178078
+//
+//https://emudev.de/nes-emulator/about-mappers-mmc1-and-mmc3/
+//https://bugzmanov.github.io/nes_ebook/chapter_6_1.html
+//https://github.com/binji/binjgb/blob/a4433d9aa7fa6e04e7d3c5ba7d27fb13e653bcae/docs/demo.js#L462
 
 // RENDER
 
@@ -205,7 +210,7 @@ const nmiCycles = 2273;
 const baseCycles = region === Region.PAL ? 33247 : 29780;
 
 function frame(shouldRender: boolean) {
-    const totalCycles = 29780 + (bus.frames & 1);
+    const totalCycles = baseCycles + (bus.frames & 1);
 
     bus.vblank = false;
 
@@ -238,25 +243,71 @@ function frame(shouldRender: boolean) {
 
     debugRAM();
 
-    if (++bus.frames > 10) {
-        // stop = true;
-    }
+    bus.frames++;
 }
-let stop = false;
 
-// TODO: fix performance issues when tabbing away
+
+// TODO: check if NO frames have to be rendered
+// TODO: sep framecount
+// get mecex to check
 const frameRate = region === Region.PAL ? 0.0500069 : 0.0600988;
 const epoch = performance.now();
 const loop = () => {
-    !stop && requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
+
     const diff = performance.now() - epoch;
     const frames = diff * frameRate | 0;
-    if (frames > bus.frames) {
-        for (let i = 0; i < frames - bus.frames; i++) {
-            frame(false);
-        }
-    }
-    frame(true);
-};
+    const extraFrames = frames - bus.frames;
 
+
+    if (document.visibilityState === 'hidden') {
+        bus.frames = frames;
+    } else if (extraFrames > 10) {
+        frame(true);
+        bus.frames = frames;
+    } else {
+        if (extraFrames > 0) {
+            for (let i = 0; i < extraFrames; i++) {
+                frame(false);
+            }
+        }
+        frame(true);
+    }
+
+    if (fixedY) {
+        RAM[0x41] = fixedY;
+        RAM[0x61] = fixedY;
+        RAM[0x45] = 0x40;
+        RAM[0x65] = 0x40;
+
+    }
+    RAM[0xc3] = 0; // skip legal
+
+};
 loop();
+
+screen.addEventListener('click', (e) => {
+    RAM[0x49] = 0
+    RAM[0x69] = 0
+    const [x, y] = [e.clientX-214, e.clientY-230];
+    const target = 0x400 + (x/16.5|0) + ((y/16.5|0) * 10);
+    const current = RAM[target];
+    RAM[target] = current === 0xEF ? 0x7b : 0xEF;
+})
+
+let fixedY = 0;
+
+const b1 =document.body.insertBefore(document.createElement('button'), document.body.firstElementChild)
+b1.textContent = 'next=longbar'
+b1.addEventListener('click', () => { RAM[0xBF] = 0x12; })
+
+
+const b2 =document.body.insertBefore(document.createElement('button'), document.body.firstElementChild)
+b2.textContent = 'current=T'
+b2.addEventListener('click', () => { RAM[0x42] = RAM[0x62]= 0; })
+
+const b3 =document.body.insertBefore(document.createElement('button'), document.body.firstElementChild)
+b3.textContent = 'gravity'
+b3.addEventListener('click', () => {
+    fixedY = fixedY ? 0 : RAM[0x41];
+})
