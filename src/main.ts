@@ -5,11 +5,11 @@ import { renderBG, renderSprites } from './render';
 const nes = new NES(tetrisROM);
 
 
-// TODO: timing
-// TODO: blocktool demo
+// TODO: timing / perf
 // TODO: audio
 // TODO: localstorage / drag
 // TODO: demo
+// TODO: tile caching
 //
 // TODO: runahead
 // TODO: timestamps, security via obscurity
