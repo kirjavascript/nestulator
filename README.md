@@ -13,3 +13,4 @@ ignore sprite limit
 HLE + jum[ out of rom
 HD mode 
 type highscore name
+fauxNes/CTMulator
