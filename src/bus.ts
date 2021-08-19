@@ -73,13 +73,13 @@ export default class TetrisBus implements BusInterface {
             // PPUCTRL
             if (value === 0x90) {
                 // backgroundTile = Boolean(value & 0b10000)
-                this.nmiEnabled = Boolean(value & 0b10000000);
+                this.nmiEnabled = !!(value & 0b10000000);
             }
             return;
         }
         if (address === 0x2001) {
             // PPUMASK
-            const showBackground = Boolean(value & 0b1000);
+            const showBackground = !!(value & 0b1000);
             if (showBackground !== this.backgroundDisplay) {
                 this.backgroundDirty = true;
             }

@@ -4,9 +4,12 @@ import { renderBG, renderSprites } from './render';
 
 const nes = new NES(tetrisROM);
 
+// nes.PRG[0x1A91] = 0; // AEPPOZ
+nes.PRG[0x1C89] = 0xFA; // maxout
+nes.PRG[0x180C] = 0x90; // fix colours
 
-// TODO: timing / perf
-// maxout code
+// TODO: timing / perf (read docs for timing)
+// maxout code / aeppoz
 // TODO: audio
 // TODO: localstorage / drag
 // TODO: demo
@@ -21,7 +24,6 @@ const nes = new NES(tetrisROM);
 //https://emudev.de/nes-emulator/about-mappers-mmc1-and-mmc3/
 //https://bugzmanov.github.io/nes_ebook/chapter_6_1.html
 //https://github.com/binji/binjgb/blob/a4433d9aa7fa6e04e7d3c5ba7d27fb13e653bcae/docs/demo.js#L462
-// LOOP
 
 const baseCycles = nes.region === Region.PAL ? 33247 : 29780;
 const nmiCycles = 2273;

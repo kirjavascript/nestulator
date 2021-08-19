@@ -117,7 +117,7 @@ export function renderSprites(nes: NES) {
         // assume attributes like this are bad
         if (tile !== 0xFF && tile !== 0xEF && x !== 0 && attr !== 0xFF) {
             const palette = palettes[attr & 0b11];
-            const vflip = Boolean(attr & 0b1000000);
+            const vflip = !!(attr & 0b1000000);
 
             const pixels = nes.tiles[tile + (nes.bus.chr0 * 0x100)];
 
