@@ -42,6 +42,7 @@ function frame(shouldRender: boolean) {
         nes.VRAM = VRAM;
         Object.assign(nes.bus, bus);
         Object.assign(nes.cpu.state, state);
+        nes.bus.backgroundDirty = false;
     } else {
         cpuFrame(false);
     }
