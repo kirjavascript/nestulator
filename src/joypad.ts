@@ -10,10 +10,10 @@ const keymap: {[key: string] : number} = {};
     ['z', 'Z', 'n', 'N'], // B
     ['Shift', 'c', 'C'], // select
     ['Enter', 'v', 'V'], // start
-    ['ArrowUp', 'w', 'W'], // U
-    ['ArrowDown', 's', 'S'], // D
-    ['ArrowLeft', 'a', 'A'], // L
-    ['ArrowRight', 'd', 'D'], // R
+    ['ArrowUp', 'w', 'W', 'i', 'I'], // U
+    ['ArrowDown', 's', 'S', 'k', 'K'], // D
+    ['ArrowLeft', 'a', 'A', 'j', 'J'], // L
+    ['ArrowRight', 'd', 'D', 'l', 'L'], // R
 ].forEach((keys, index) => {
     keys.forEach(key => { keymap[key] = index; });
 });

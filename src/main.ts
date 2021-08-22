@@ -8,14 +8,14 @@ const nes = new NES(tetrisROM);
 nes.PRG[0x1C89] = 0xFA; // maxout
 nes.PRG[0x180C] = 0x90; // fix colours
 
-// TODO: timing / perf (read docs for timing)
-// maxout code / aeppoz
+// TODO: perf
 // TODO: audio
 // TODO: localstorage / drag
 // TODO: demo
 // TODO: tile caching
 //
-// TODO: runahead
+// TODO: runahead slider
+// TODO: fullscreen, controls
 // TODO: timestamps, security via obscurity
 
 // SOCD / runahead discussion
@@ -29,6 +29,24 @@ const baseCycles = nes.region === Region.PAL ? 33247 : 29780;
 const nmiCycles = 2273;
 
 function frame(shouldRender: boolean) {
+    if (shouldRender) {
+        cpuFrame(false);
+        const RAM = nes.RAM.slice(0);
+        const VRAM = nes.VRAM.slice(0);
+        const state = { ...nes.cpu.state };
+        const bus = { ...nes.bus };
+        cpuFrame(true);
+        // rollback
+        nes.RAM = RAM;
+        nes.VRAM = VRAM;
+        Object.assign(nes.bus, bus);
+        Object.assign(nes.cpu.state, state);
+    } else {
+        cpuFrame(false);
+    }
+}
+
+function cpuFrame(shouldRender: boolean) {
     const totalCycles = baseCycles + (nes.bus.frames & 1);
 
     nes.bus.nmiChecked = false;
@@ -55,6 +73,10 @@ function frame(shouldRender: boolean) {
         // TODO: potentially break here
     }
 
+    while (nes.cpu.executionState !== 1) {
+        nes.cpu.cycle();
+    }
+
     if (shouldRender) {
         renderBG(nes);
     }
@@ -63,7 +85,6 @@ function frame(shouldRender: boolean) {
 }
 
 const frameCount = document.body.insertBefore(document.createElement('div'), document.body.firstElementChild);
-
 const frameRate = nes.region === Region.PAL ? 0.0500069 : 0.0600988;
 const epoch = performance.now();
 let framesDone = 0;

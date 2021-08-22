@@ -40,6 +40,7 @@ export default class NES {
             const pixels = [];
             const chrData = this.CHR.slice(cursor, cursor + 0x10);
             for (let i = 0; i < 8; i++) {
+                // this code is slow but also quite funny and only run once
                 const high = chrData[i].toString(2).padStart(8, '0');
                 const low = chrData[i + 8].toString(2).padStart(8, '0');
                 for (let j = 0; j < 8; j++) {
