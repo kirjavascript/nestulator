@@ -8,13 +8,14 @@ const nes = new NES(tetrisROM);
 nes.PRG[0x1C89] = 0xFA; // maxout
 nes.PRG[0x180C] = 0x90; // fix colours
 
+// TODO: mobile
 // TODO: perf
 // TODO: audio
 // TODO: localstorage / drag
 // TODO: demo
 // TODO: tile caching
 //
-// TODO: runahead slider
+// TODO: runahead slider/ toggle
 // TODO: fullscreen, controls
 // TODO: timestamps, security via obscurity
 
@@ -68,7 +69,11 @@ function cpuFrame(shouldRender: boolean) {
         nes.bus.vblank = true;
     }
 
-    for (let i = 0; i < nmiCycles; i++) {
+    const afterCycles = nes.RAM[0xC0] === 3
+        ? 20000 // workaround for level select screen
+        : nmiCycles;
+
+    for (let i = 0; i < afterCycles; i++) {
         nes.cpu.cycle();
         // TODO: potentially break here
     }
