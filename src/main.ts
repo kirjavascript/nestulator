@@ -13,17 +13,9 @@ const noLegal = true;
 // TODO: audio
 // TODO: controls / joystick api
 // TODO: demo
+// TODO: favicon
 //
 // perf: (tile caching, reduced cpu)
-
-// SOCD / runahead discussion
-// https://discord.com/channels/374368504465457153/577489649493213185/877303108626178078
-//
-//https://emudev.de/nes-emulator/about-mappers-mmc1-and-mmc3/
-//https://bugzmanov.github.io/nes_ebook/chapter_6_1.html
-//https://github.com/binji/binjgb/blob/a4433d9aa7fa6e04e7d3c5ba7d27fb13e653bcae/docs/demo.js#L462
-//
-// https://www.hitboxarcade.com/blogs/faq/what-is-an-socd
 
 const baseCycles = nes.region === Region.PAL ? 33247 : 29780;
 const nmiCycles = 2273;
@@ -67,12 +59,12 @@ function cpuFrame(shouldRender: boolean){
     }
 
     if (nes.bus.nmiEnabled) {
-        nes.cpu.nmi();
         nes.bus.vblank = true;
+        nes.cpu.nmi();
     }
 
     const afterCycles = nes.RAM[0xC0] === 3
-        ? 20000 // workaround for level select screen bug
+        ? 1300 // workaround for level select screen bug
         : nmiCycles;
 
     for (let i = 0; i < afterCycles; i++) {
