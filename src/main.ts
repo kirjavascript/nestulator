@@ -16,7 +16,7 @@ nes.PRG[0x180C] = 0x90; // fix colours
 // TODO: tile caching
 //
 // TODO: runahead slider/ toggle
-// TODO: fullscreen, controls
+// TODO: controls
 // TODO: timestamps, security via obscurity
 
 // SOCD / runahead discussion
@@ -74,7 +74,7 @@ function cpuFrame(shouldRender: boolean) {
         ? 20000 // workaround for level select screen
         : nmiCycles;
 
-    for (let i = 0; i < afterCycles; i++) {
+    for (let i = 0; i < nmiCycles; i++) {
         nes.cpu.cycle();
         // TODO: potentially break here
     }
@@ -90,7 +90,7 @@ function cpuFrame(shouldRender: boolean) {
     nes.bus.frames++;
 }
 
-const frameCount = document.body.insertBefore(document.createElement('div'), document.body.firstElementChild);
+const frameCount = document.querySelector('.frameCount');
 const frameRate = nes.region === Region.PAL ? 0.0500069 : 0.0600988;
 const epoch = performance.now();
 let framesDone = 0;

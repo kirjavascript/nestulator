@@ -6,26 +6,56 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui">
         <title>trueNES</title>
 <style>
+html, body {
+    height: 100%;
+    margin: 0;
+    background-color: #111;
+    color: #777;
+}
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: monospace;
+}
 .screen {
     position: relative;
+    width: 100%;
     height: 512px;
 }
 canvas {
+    width: 100%;
     height: 512px;
+    max-height: 512px;
+    box-shadow: 2px 2px 5px black;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+}
+.sprites {
     position: absolute;
+    top: 0;
+    left: 0;
+}
+.frameCount {
+    font-size: 24px;
 }
 </style>
     </head>
     <body>
-        <p>
-            Arrows / WASD / IJKL
-            A: X / M
-            B: Z / N
-            Start: Enter / V
-            Select: Shift / C
-        </p>
+        <main>
+            <div class="screen">
+                <canvas class="background"></canvas>
+                <canvas class="sprites"></canvas>
+            </div>
+            <p>
+                Arrows / WASD / IJKL
+                A: X / M
+                B: Z / N
+                Start: Enter / V
+                Select: Shift / C
+            </p>
+            <p class="frameCount"></p>
+        </main>
         <script src="./bundle.js"></script>
     </body>
 </html>

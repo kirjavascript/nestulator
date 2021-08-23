@@ -36,10 +36,7 @@ import { paletteHex, paletteRGB } from './colors';
     //         paletteDebug.appendChild(box);
     //     });
 
-const screen = document.body.appendChild(document.createElement('div'));
-screen.className = 'screen';
-
-const background = screen.appendChild(document.createElement('canvas'));
+const background = document.querySelector('.background');
 background.width = 256;
 background.height = 240;
 const ctx = background.getContext('2d') as CanvasRenderingContext2D;
@@ -96,7 +93,7 @@ export function renderBG(nes: NES) {
     }
 }
 
-const sprites = screen.appendChild(document.createElement('canvas'));
+const sprites = document.querySelector('.sprites');
 sprites.width = 256;
 sprites.height = 240;
 const spCtx = sprites.getContext('2d') as CanvasRenderingContext2D;
