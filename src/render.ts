@@ -22,7 +22,7 @@ export function renderBG(nes: NES) {
         ctx.clearRect(0, 0, background.width, background.height);
         return;
     }
-    console.log('render');
+    // console.log('render');
 
     const palettes = [
         nes.VRAM.slice(0x3f00, 0x3f04),

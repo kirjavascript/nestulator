@@ -8,11 +8,10 @@ const nes = new NES(tetrisROM);
 nes.PRG[0x1C89] = 0xFA; // maxout
 nes.PRG[0x180C] = 0x90; // fix colours
 
-// TODO: perf
+// TODO: perf (tile caching, redurecd cpu)
 // TODO: audio
 // TODO: localstorage / drag
 // TODO: demo
-// TODO: tile caching
 //
 // TODO: runahead slider/ toggle
 // TODO: controls
@@ -35,12 +34,14 @@ function frame(shouldRender: boolean) {
         const RAM = nes.RAM.slice(0);
         const VRAM = nes.VRAM.slice(0);
         const state = { ...nes.cpu.state };
+        const cpu = { ...nes.cpu };
         const bus = { ...nes.bus };
         cpuFrame(true);
         // rollback
         nes.RAM = RAM;
         nes.VRAM = VRAM;
         Object.assign(nes.bus, bus);
+        Object.assign(nes.cpu, cpu);
         Object.assign(nes.cpu.state, state);
         nes.bus.backgroundDirty = false;
     } else {
@@ -74,7 +75,7 @@ function cpuFrame(shouldRender: boolean) {
         ? 20000 // workaround for level select screen
         : nmiCycles;
 
-    for (let i = 0; i < nmiCycles; i++) {
+    for (let i = 0; i < afterCycles; i++) {
         nes.cpu.cycle();
         // TODO: potentially break here
     }
