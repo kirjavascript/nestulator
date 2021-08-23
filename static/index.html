@@ -18,18 +18,26 @@ body {
     align-items: center;
     font-family: monospace;
 }
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 .screen {
     position: relative;
-    width: 100%;
     height: 512px;
 }
 canvas {
-    width: 100%;
     height: 512px;
-    max-height: 512px;
     box-shadow: 2px 2px 5px black;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+}
+.screen:fullscreen canvas {
+    width: 100vw;
+    max-height: 100vh;
+    object-fit: contain;
+    height: initial;
 }
 .sprites {
     position: absolute;
@@ -54,7 +62,10 @@ canvas {
                 Start: Enter / V
                 Select: Shift / C
             </p>
-            <p class="frameCount"></p>
+            <p>
+                frames: <span class="frameCount"></span>
+            </p>
+            <button id="fullscreen">fullscreen</button>
         </main>
         <script src="./bundle.js"></script>
     </body>

@@ -8,7 +8,6 @@ const nes = new NES(tetrisROM);
 nes.PRG[0x1C89] = 0xFA; // maxout
 nes.PRG[0x180C] = 0x90; // fix colours
 
-// TODO: mobile
 // TODO: perf
 // TODO: audio
 // TODO: localstorage / drag
@@ -17,6 +16,7 @@ nes.PRG[0x180C] = 0x90; // fix colours
 //
 // TODO: runahead slider/ toggle
 // TODO: controls
+// joystick api
 // TODO: timestamps, security via obscurity
 
 // SOCD / runahead discussion
