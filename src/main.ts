@@ -3,6 +3,7 @@ import NES, { Region } from './nes';
 import { renderBG, renderSprites } from './render';
 
 const nes = new NES(tetrisROM);
+window.nes = nes;
 
 // nes.PRG[0x1A91] = 0; // AEPPOZ
 nes.PRG[0x1C89] = 0xFA; // maxout
@@ -13,10 +14,8 @@ nes.PRG[0x180C] = 0x90; // fix colours
 // TODO: localstorage / drag
 // TODO: demo
 //
-// TODO: runahead slider/ toggle
 // TODO: controls
 // joystick api
-// TODO: timestamps, security via obscurity
 
 // SOCD / runahead discussion
 // https://discord.com/channels/374368504465457153/577489649493213185/877303108626178078
@@ -29,7 +28,7 @@ const baseCycles = nes.region === Region.PAL ? 33247 : 29780;
 const nmiCycles = 2273;
 
 function frame(shouldRender: boolean) {
-    if (shouldRender) {
+    if (shouldRender && nes.runahead) {
         cpuFrame(false);
         const RAM = nes.RAM.slice(0);
         const VRAM = nes.VRAM.slice(0);
@@ -45,7 +44,7 @@ function frame(shouldRender: boolean) {
         Object.assign(nes.cpu.state, state);
         nes.bus.backgroundDirty = false;
     } else {
-        cpuFrame(false);
+        cpuFrame(shouldRender);
     }
 }
 
@@ -72,7 +71,7 @@ function cpuFrame(shouldRender: boolean) {
     }
 
     const afterCycles = nes.RAM[0xC0] === 3
-        ? 20000 // workaround for level select screen
+        ? 20000 // workaround for level select screen bug
         : nmiCycles;
 
     for (let i = 0; i < afterCycles; i++) {
@@ -84,6 +83,9 @@ function cpuFrame(shouldRender: boolean) {
         nes.cpu.cycle();
     }
 
+    // const sfx = nes.RAM[0x6F9];
+    // sfx && console.log(['nothing', 'option', 'screen', 'shift', 'tetris', 'rotate', 'levelup', 'lock', 'chirp?', 'clear', 'complete'][nes.RAM[0x6F9]])
+
     if (shouldRender) {
         renderBG(nes);
     }
@@ -91,7 +93,13 @@ function cpuFrame(shouldRender: boolean) {
     nes.bus.frames++;
 }
 
-const frameCount = document.querySelector('.frameCount');
+const runaheadBox = document.querySelector('#runahead') as HTMLInputElement;
+runaheadBox.addEventListener('click', e => {
+    nes.runahead = (e.target as HTMLInputElement).checked;
+});
+nes.runahead = runaheadBox.checked;
+
+const frameCount = document.querySelector('.frameCount') as HTMLSpanElement;
 const frameRate = nes.region === Region.PAL ? 0.0500069 : 0.0600988;
 const epoch = performance.now();
 let framesDone = 0;

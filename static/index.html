@@ -22,6 +22,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 20px 0;
 }
 .screen {
     position: relative;
@@ -44,6 +45,27 @@ canvas {
     top: 0;
     left: 0;
 }
+.options {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: flex-end;
+}
+button {
+    background-color: #111;
+    color: #777;
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: bold;
+    border: 2px solid #777;
+    border-radius: 2px;
+}
+@media (max-width: 512px) {
+    .options {
+        flex-direction:  column;
+        align-items: center;
+    }
+}
 .frameCount {
     font-size: 24px;
 }
@@ -62,10 +84,16 @@ canvas {
                 Start: Enter / V
                 Select: Shift / C
             </p>
-            <p>
-                frames: <span class="frameCount"></span>
-            </p>
-            <button id="fullscreen">fullscreen</button>
+            <div class="options">
+                <button id="fullscreen">fullscreen</button>
+                <p>
+                    NES frames this frame: <span class="frameCount"></span>
+                </p>
+                <div>
+                    <label for="runahead">1f runahead</label>
+                    <input type="checkbox" id="runahead" name="runahead" checked>
+                </div>
+            </div>
         </main>
         <script src="./bundle.js"></script>
     </body>

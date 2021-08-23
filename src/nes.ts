@@ -16,6 +16,7 @@ export default class NES {
     VRAM: Uint8Array;
     tiles: Array<Array<number>>;
     region: Region;
+    runahead: boolean = true;
 
     constructor(ROM: Uint8Array) {
         this.bus = new TetrisBus(this);

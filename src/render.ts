@@ -1,14 +1,14 @@
 import NES from './nes';
 import { paletteHex, paletteRGB } from './colors';
 
-document.querySelector('#fullscreen')
+(document.querySelector('#fullscreen') as HTMLButtonElement)
     .addEventListener('click', () => {
-        document.querySelector('.screen')
+        (document.querySelector('.screen') as HTMLDivElement)
             .requestFullscreen()
             .catch(console.error);
     });
 
-const background = document.querySelector('.background');
+const background = document.querySelector('.background') as HTMLCanvasElement;
 background.width = 256;
 background.height = 240;
 const ctx = background.getContext('2d') as CanvasRenderingContext2D;
@@ -65,7 +65,7 @@ export function renderBG(nes: NES) {
     }
 }
 
-const sprites = document.querySelector('.sprites');
+const sprites = document.querySelector('.sprites') as HTMLCanvasElement;
 sprites.width = 256;
 sprites.height = 240;
 const spCtx = sprites.getContext('2d') as CanvasRenderingContext2D;
