@@ -3,19 +3,18 @@ import NES, { Region } from './nes';
 import { renderBG, renderSprites } from './render';
 
 const nes = new NES(tetrisROM);
-window.nes = nes;
 
 // nes.PRG[0x1A91] = 0; // AEPPOZ
 nes.PRG[0x1C89] = 0xFA; // maxout
 nes.PRG[0x180C] = 0x90; // fix colours
+const noLegal = true;
 
-// TODO: perf (tile caching, redurecd cpu)
-// TODO: audio
 // TODO: localstorage / drag
+// TODO: audio
+// TODO: controls / joystick api
 // TODO: demo
 //
-// TODO: controls
-// joystick api
+// perf: (tile caching, reduced cpu)
 
 // SOCD / runahead discussion
 // https://discord.com/channels/374368504465457153/577489649493213185/877303108626178078
@@ -23,6 +22,8 @@ nes.PRG[0x180C] = 0x90; // fix colours
 //https://emudev.de/nes-emulator/about-mappers-mmc1-and-mmc3/
 //https://bugzmanov.github.io/nes_ebook/chapter_6_1.html
 //https://github.com/binji/binjgb/blob/a4433d9aa7fa6e04e7d3c5ba7d27fb13e653bcae/docs/demo.js#L462
+//
+// https://www.hitboxarcade.com/blogs/faq/what-is-an-socd
 
 const baseCycles = nes.region === Region.PAL ? 33247 : 29780;
 const nmiCycles = 2273;
@@ -48,7 +49,7 @@ function frame(shouldRender: boolean) {
     }
 }
 
-function cpuFrame(shouldRender: boolean) {
+function cpuFrame(shouldRender: boolean){
     const totalCycles = baseCycles + (nes.bus.frames & 1);
 
     nes.bus.nmiChecked = false;
@@ -120,7 +121,7 @@ const loop = () => {
             }
         }
     }
-    nes.RAM[0xc3] = 0; // skip legal
+    noLegal && (nes.RAM[0xc3] = 0); // skip legal
     framesDone = frames;
 };
 loop();

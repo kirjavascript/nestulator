@@ -1,9 +1,6 @@
-nestris emulator, just for fun
-
-goals: fast & accurate, via game-specific performance hacks
+fast & accurate nestris emulator for competitive play
 
 TODO:
 
-runahead  
 sound; use samples  
 anticheat: server side auth  
