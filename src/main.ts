@@ -1,12 +1,7 @@
+import tetrisROM from '../tetris.nes';
 import NES, { Region } from './nes';
 import { renderBG, renderSprites } from './render';
-
-const nes = new NES();
-
-// nes.PRG[0x1A91] = 0; // AEPPOZ
-nes.PRG[0x1C89] = 0xFA; // maxout
-nes.PRG[0x180C] = 0x90; // fix colours
-const noLegal = true;
+import buildUI from './ui';
 
 /*
     to make an emulator with strong anti cheat, you need to first make an emulator that people want to actually use
@@ -23,6 +18,16 @@ const noLegal = true;
 // TODO: demo
 //
 // perf: (tile caching, reduced cpu)
+
+const nes = new NES(tetrisROM);
+window.nes = nes;
+
+buildUI(nes);
+
+// nes.PRG[0x1A91] = 0; // AEPPOZ
+nes.PRG[0x1C89] = 0xFA; // maxout
+nes.PRG[0x180C] = 0x90; // fix colours
+const noLegal = true;
 
 const baseCycles = nes.region === Region.PAL ? 33247 : 29780;
 const nmiCycles = 2273;
@@ -93,12 +98,6 @@ function cpuFrame(shouldRender: boolean){
 
     nes.bus.frames++;
 }
-
-const runaheadBox = document.querySelector('#runahead') as HTMLInputElement;
-runaheadBox.addEventListener('click', e => {
-    nes.runahead = (e.target as HTMLInputElement).checked;
-});
-nes.runahead = runaheadBox.checked;
 
 const frameCount = document.querySelector('.frameCount') as HTMLSpanElement;
 const frameRate = nes.region === Region.PAL ? 0.0500069 : 0.0600988;

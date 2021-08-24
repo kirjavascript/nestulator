@@ -1,13 +1,6 @@
 import NES from './nes';
 import { paletteHex, paletteRGB } from './colors';
 
-(document.querySelector('#fullscreen') as HTMLButtonElement)
-    .addEventListener('click', () => {
-        (document.querySelector('.screen') as HTMLDivElement)
-            .requestFullscreen()
-            .catch(console.error);
-    });
-
 const background = document.querySelector('.background') as HTMLCanvasElement;
 background.width = 256;
 background.height = 240;
@@ -22,7 +15,6 @@ export function renderBG(nes: NES) {
         ctx.clearRect(0, 0, background.width, background.height);
         return;
     }
-    // console.log('render');
 
     const palettes = [
         nes.VRAM.slice(0x3f00, 0x3f04),

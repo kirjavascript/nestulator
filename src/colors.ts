@@ -1,7 +1,7 @@
 import palFile from '../Smooth (FBX).pal';
 
 const palette = [...palFile];
-const paletteRGB = [];
+const paletteRGB: Array<Array<number>> = [];
 
 while (palette.length) {
     paletteRGB.push(palette.splice(0, 3));
