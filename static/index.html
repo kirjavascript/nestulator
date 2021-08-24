@@ -51,7 +51,7 @@ canvas {
     width: 100%;
     align-items: flex-end;
 }
-button {
+button, input, .file {
     background-color: #111;
     color: #777;
     font-family: monospace;
@@ -59,6 +59,7 @@ button {
     font-weight: bold;
     border: 2px solid #777;
     border-radius: 2px;
+    padding: 1px 4px;
 }
 @media (max-width: 512px) {
     .options {
@@ -68,6 +69,9 @@ button {
 }
 .frameCount {
     font-size: 24px;
+}
+input[type="file"] {
+    display: none;
 }
 </style>
     </head>
@@ -87,7 +91,10 @@ button {
             <div class="options">
                 <div>
                     <button id="fullscreen">fullscreen</button>
-                    <button id="rom">ROM</button>
+                    <label for="file" class="file">
+                        ROM
+                    </label>
+                    <input id="file" type="file" />
                 </div>
                 <p>
                     NES frames this frame: <span class="frameCount"></span>

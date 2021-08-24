@@ -12,10 +12,10 @@ export default class NES {
     bus: TetrisBus;
     PRG!: Uint8Array;
     CHR!: Uint8Array;
-    RAM: Uint8Array;
-    VRAM: Uint8Array;
+    RAM: Uint8Array = new Uint8Array(0x2000);
+    VRAM: Uint8Array = new Uint8Array(0x4000);
     tiles: Array<Array<number>> = [];
-    region: Region;
+    region: Region = Region.NTSC;
     running: boolean;
     runahead: boolean = true;
 
@@ -23,23 +23,13 @@ export default class NES {
         this.bus = new TetrisBus(this);
         this.cpu = new StateMachineCpu(this.bus);
         this.setROM(ROM);
-        this.RAM = new Uint8Array(0x2000);
-        this.VRAM = new Uint8Array(0x4000);
-        this.running = !!ROM.length;
-
-        const dropTable = this.PRG[0x98E];
-        if (dropTable === 0x30) {
-            this.region = Region.NTSC;
-        } else if (dropTable === 0x24) {
-            this.region = Region.PAL;
-        } else {
-            this.region = Region.GYM;
-        }
     }
 
     public setROM(ROM: Uint8Array) {
         this.PRG = ROM.slice(0x10, 0x8010);
         this.CHR = ROM.slice(0x8010); // 2bpp, 16 per tile
+        this.running = !!ROM.length;
+        this.cpu.reset();
 
         this.tiles.splice(0, this.tiles.length);
 
@@ -56,6 +46,14 @@ export default class NES {
             }
             this.tiles.push(pixels);
         }
-    }
 
+        const dropTable = this.PRG[0x98E];
+        if (dropTable === 0x30) {
+            this.region = Region.NTSC;
+        } else if (dropTable === 0x24) {
+            this.region = Region.PAL;
+        } else {
+            this.region = Region.GYM;
+        }
+    }
 }

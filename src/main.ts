@@ -1,4 +1,3 @@
-import tetrisROM from '../tetris.nes';
 import NES, { Region } from './nes';
 import { renderBG, renderSprites } from './render';
 import buildUI from './ui';
@@ -6,20 +5,21 @@ import buildUI from './ui';
 /*
     to make an emulator with strong anti cheat, you need to first make an emulator that people want to actually use
     this emulator aims for good performance, with precise timing and gameplay mechanics for competitive play
-    this is the first demo version. its a little rough around the edges. feedback would be great
     the codebase is simple, hackable and portable; there is a lot of scope for different types of project
+    this is the first demo version, feedback would be great
 
 */
 
-// TODO: localstorage / region / drag / try hacks
+// TODO: localstorage / fix auto region / try hacks
 // TODO: audio
 // TODO: controls / joystick api
+// TODO: .pal input
 // TODO: favicon
 // TODO: demo
 //
 // perf: (tile caching, reduced cpu)
 
-const nes = new NES(tetrisROM);
+const nes = new NES();
 window.nes = nes;
 
 buildUI(nes);
@@ -29,6 +29,7 @@ nes.PRG[0x1C89] = 0xFA; // maxout
 nes.PRG[0x180C] = 0x90; // fix colours
 const noLegal = true;
 
+// this value doesnt really matter as we skip a lot of cycles
 const baseCycles = nes.region === Region.PAL ? 33247 : 29780;
 const nmiCycles = 2273;
 

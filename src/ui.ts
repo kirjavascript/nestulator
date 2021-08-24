@@ -1,11 +1,30 @@
 import NES from './nes';
+
 export default function buildUI(nes: NES) {
+    const rom = window.localStorage.getItem('ROM');
+    if (rom?.length) {
+        nes.setROM(Uint8Array.from(JSON.parse(rom)));
+    }
+
     // fullscreen
     (document.querySelector('#fullscreen') as HTMLButtonElement)
         .addEventListener('click', () => {
             (document.querySelector('.screen') as HTMLDivElement)
             .requestFullscreen()
             .catch(console.error);
+        });
+
+    (document.querySelector('#file') as HTMLInputElement)
+        .addEventListener('change', (e: any) => {
+            const reader = new FileReader();
+            reader.readAsArrayBuffer(e.target.files[0]);
+            reader.onloadend = () => {
+                // @ts-ignore
+                const rom = new Uint8Array(reader.result);
+                nes.setROM(rom);
+                window.localStorage.setItem('ROM', JSON.stringify([...rom]));
+            };
+            e.preventDefault();
         });
 
     const runaheadBox = document.querySelector('#runahead') as HTMLInputElement;
