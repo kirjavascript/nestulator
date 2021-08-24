@@ -1,17 +1,24 @@
-import tetrisROM from '../tetris.nes';
 import NES, { Region } from './nes';
 import { renderBG, renderSprites } from './render';
 
-const nes = new NES(tetrisROM);
+const nes = new NES();
 
 // nes.PRG[0x1A91] = 0; // AEPPOZ
 nes.PRG[0x1C89] = 0xFA; // maxout
 nes.PRG[0x180C] = 0x90; // fix colours
 const noLegal = true;
 
+/*
+    to make an emulator with strong anti cheat, you need to first make an emulator that people want to actually use
+    this emulator aims for good performance, with precise timing and gameplay mechanics for competitive play
+    this is the first demo version. its a little rough around the edges. feedback would be great
+    the codebase is simple, hackable and portable; there is a lot of scope for different types of project
+
+*/
+
+// TODO: localstorage / region / drag / try hacks
 // TODO: audio
 // TODO: controls / joystick api
-// TODO: localstorage / drag / try hacks
 // TODO: favicon
 // TODO: demo
 //
@@ -105,7 +112,7 @@ const loop = () => {
     const frameAmount = frames - framesDone;
     frameCount.textContent = String(frameAmount);
 
-    if (document.visibilityState !== 'hidden') {
+    if (nes.running && document.visibilityState !== 'hidden') {
         if (frameAmount > 5) {
             frame(true);
         } else {

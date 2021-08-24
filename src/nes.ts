@@ -10,21 +10,22 @@ export enum Region {
 export default class NES {
     cpu: StateMachineCpu;
     bus: TetrisBus;
-    PRG: Uint8Array;
-    CHR: Uint8Array;
+    PRG!: Uint8Array;
+    CHR!: Uint8Array;
     RAM: Uint8Array;
     VRAM: Uint8Array;
-    tiles: Array<Array<number>>;
+    tiles: Array<Array<number>> = [];
     region: Region;
+    running: boolean;
     runahead: boolean = true;
 
-    constructor(ROM: Uint8Array) {
+    public constructor(ROM: Uint8Array = new Uint8Array()) {
         this.bus = new TetrisBus(this);
         this.cpu = new StateMachineCpu(this.bus);
-        this.PRG = ROM.slice(0x10, 0x8010);
-        this.CHR = ROM.slice(0x8010); // 2bpp, 16 per tile
+        this.setROM(ROM);
         this.RAM = new Uint8Array(0x2000);
         this.VRAM = new Uint8Array(0x4000);
+        this.running = !!ROM.length;
 
         const dropTable = this.PRG[0x98E];
         if (dropTable === 0x30) {
@@ -34,8 +35,13 @@ export default class NES {
         } else {
             this.region = Region.GYM;
         }
+    }
 
-        this.tiles = [];
+    public setROM(ROM: Uint8Array) {
+        this.PRG = ROM.slice(0x10, 0x8010);
+        this.CHR = ROM.slice(0x8010); // 2bpp, 16 per tile
+
+        this.tiles.splice(0, this.tiles.length);
 
         for (let cursor = 0; cursor < this.CHR.length; cursor += 0x10) {
             const pixels = [];
@@ -50,8 +56,6 @@ export default class NES {
             }
             this.tiles.push(pixels);
         }
-
-
     }
 
 }
