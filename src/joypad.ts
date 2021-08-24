@@ -26,7 +26,7 @@ html.addEventListener('keydown', e => {
         // handle SOCD as second input priority for L/R
         if (index === 6) controls.delete(7);
         if (index === 7) controls.delete(6);
-        controls.add(keymap[e.key]);
+        controls.add(index);
         e.preventDefault();
     }
 });

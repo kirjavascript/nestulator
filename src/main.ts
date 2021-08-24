@@ -9,11 +9,11 @@ nes.PRG[0x1C89] = 0xFA; // maxout
 nes.PRG[0x180C] = 0x90; // fix colours
 const noLegal = true;
 
-// TODO: localstorage / drag
 // TODO: audio
 // TODO: controls / joystick api
-// TODO: demo
+// TODO: localstorage / drag / try hacks
 // TODO: favicon
+// TODO: demo
 //
 // perf: (tile caching, reduced cpu)
 
@@ -69,9 +69,10 @@ function cpuFrame(shouldRender: boolean){
 
     for (let i = 0; i < afterCycles; i++) {
         nes.cpu.cycle();
-        // TODO: potentially break here
+        // do nmi cycles... and some of the next frame
     }
 
+    // unless we align executionState rollback doesn work
     while (nes.cpu.executionState !== 1) {
         nes.cpu.cycle();
     }
