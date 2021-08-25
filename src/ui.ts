@@ -6,7 +6,6 @@ export default function buildUI(nes: NES) {
         nes.setROM(Uint8Array.from(JSON.parse(rom)));
     }
 
-    // fullscreen
     (document.querySelector('#fullscreen') as HTMLButtonElement)
         .addEventListener('click', () => {
             (document.querySelector('.screen') as HTMLDivElement)
