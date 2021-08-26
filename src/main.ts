@@ -3,7 +3,7 @@ import buildUI from './ui';
 
 /*
     to make an emulator with strong anti cheat, you need to first make an emulator that people want to actually use
-    this emulator aims for good performance, with precise timing and gameplay mechanics for competitive play. the codebase is simple, hackable and portable
+    this emulator aims for good performance, with precise timing and gameplay mechanics for competitive play. the codebase is simple, hackable and embeddable
     this a rough first demo, feedback would be great
     nearly every ROM hack works, except tetrisgym (for now)
 
@@ -14,10 +14,11 @@ import buildUI from './ui';
 // TODO: .pal input
 // TODO: favicon
 // TODO: demo
+// TODO: add source link
 //
 // TODO: recording (per game) / playback
 // TODO: seed find
-// perf: (tile caching, reduced cpu)
+// perf: (tile caching, nametable write directly to UI, reduced cpu)
 
 const nes = new NES();
 window.nes = nes;

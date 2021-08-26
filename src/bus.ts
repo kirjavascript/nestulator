@@ -15,6 +15,7 @@ export default class TetrisBus implements BusInterface {
     joyIndex: number = 0;
     backgroundDirty: boolean = false;
     backgroundDisplay: boolean = true;
+    sfx: Set<number> = new Set();
     constructor(nes: NES) {
         this.nes = nes;
     }
@@ -33,13 +34,9 @@ export default class TetrisBus implements BusInterface {
             return this.nes.RAM[0x33];
         }
 
-        // RAM
         if (address < 0x2000) {
+            // RAM
             return this.nes.RAM[address & 0x7ff];
-        }
-        // ROM
-        if (address >= 0x8000) {
-            return this.nes.PRG[address - 0x8000];
         }
 
         if (address === 0x2002) {
@@ -60,11 +57,21 @@ export default class TetrisBus implements BusInterface {
 
         if (address === 0x4017) return 0; // joypad2
 
+        if (address >= 0x8000) {
+            // ROM
+            return this.nes.PRG[address - 0x8000];
+        }
+
         console.log(['last', Number(this.nes.cpu.state.p).toString(16)]);
         console.error('read', address.toString(16));
         return 0;
     }
     write(address: number, value: number): void {
+        if (address === 0x6F1 && value !== 0) {
+            // sound effect slot 1 init
+            this.sfx.add(value);
+            return;
+        }
         if (address < 0x2000) {
             this.nes.RAM[address & 0x7ff] = value;
             return;
@@ -121,12 +128,10 @@ export default class TetrisBus implements BusInterface {
             // APU
             return;
         }
-
         if (address >= 0x8000 && address <= 0x9fff) {
             // MMC1 Control
             return;
         }
-
         if (address === 0xbfff) {
             if (this.chr0Index === 0) {
                 this.chr0 = value;

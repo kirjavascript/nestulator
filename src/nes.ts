@@ -132,9 +132,8 @@ export default class NES {
             this.cpu.cycle();
         }
 
-        playSFX(this);
-
         if (shouldRender) {
+            playSFX(this);
             renderBG(this);
         }
 
