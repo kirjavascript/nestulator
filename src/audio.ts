@@ -13,8 +13,6 @@ import complete from '../sfx/9.ogg';
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 const context = new AudioContext();
 
-// ['nothing', 'option', 'screen', 'shift', 'tetris', 'rotate', 'levelup', 'lock', 'chirp?', 'clear', 'complete']
-
 const clips = [
     option,
     screen,
@@ -23,7 +21,7 @@ const clips = [
     rotate,
     levelup,
     lock,
-    null,
+    shift, // 'chirp'
     clear,
     complete,
 ].map((clipView: Uint8Array) => {

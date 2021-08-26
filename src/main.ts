@@ -9,7 +9,6 @@ import buildUI from './ui';
 
 */
 
-// TODO: audio
 // TODO: controls / joystick api
 // TODO: favicon
 // TODO: demo
