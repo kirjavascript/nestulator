@@ -11,11 +11,10 @@ import buildUI from './ui';
 
 // TODO: audio
 // TODO: controls / joystick api
-// TODO: .pal input
 // TODO: favicon
 // TODO: demo
-// TODO: add source link
 //
+// TODO: .pal input
 // TODO: recording (per game) / playback
 // TODO: seed find
 // perf: (tile caching, nametable write directly to UI, reduced cpu)

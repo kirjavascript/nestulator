@@ -1,5 +1,8 @@
 import NES from './nes';
 import option from '../sfx/1.ogg';
+import screen from '../sfx/2.ogg';
+import shift from '../sfx/3.ogg';
+import tetris from '../sfx/4.ogg';
 
 // @ts-ignore
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -7,7 +10,12 @@ const context = new AudioContext();
 
 // ['nothing', 'option', 'screen', 'shift', 'tetris', 'rotate', 'levelup', 'lock', 'chirp?', 'clear', 'complete']
 
-const clips = [option].map((clipView: Uint8Array) => {
+const clips = [
+    option,
+    screen,
+    shift,
+    tetris,
+].map((clipView: Uint8Array) => {
     const clip: {
         playing: boolean,
         play: () => void,
@@ -46,8 +54,12 @@ const clips = [option].map((clipView: Uint8Array) => {
 
 export function playSFX(nes: NES) {
     if (nes.bus.sfx.size) {
-        for (const index of nes.bus.sfx) {
-            clips[index].play();
+        for (const number of nes.bus.sfx) {
+            if (clips[number - 1]) {
+                clips[number - 1].play();
+            } else {
+                console.error(number - 1);
+            }
         }
         nes.bus.sfx.clear();
     }

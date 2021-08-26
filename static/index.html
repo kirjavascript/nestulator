@@ -51,6 +51,12 @@ canvas {
     width: 100%;
     align-items: flex-end;
 }
+@media (max-width: 512px) {
+    .options {
+        flex-direction: column;
+        align-items: center;
+    }
+}
 button, input, .file {
     background-color: #111;
     color: #777;
@@ -61,17 +67,19 @@ button, input, .file {
     border-radius: 2px;
     padding: 1px 4px;
 }
-@media (max-width: 512px) {
-    .options {
-        flex-direction: column;
-        align-items: center;
-    }
+a {
+    color: #777;
 }
 .frameCount {
     font-size: 24px;
 }
 input[type="file"] {
     display: none;
+}
+.source {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
 }
 </style>
     </head>
@@ -105,6 +113,7 @@ input[type="file"] {
                 </div>
             </div>
         </main>
+        <a class="source" href="https://github.com/kirjavascript/nestulator">source</a>
         <script src="./bundle.js"></script>
     </body>
 </html>
