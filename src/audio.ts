@@ -3,6 +3,11 @@ import option from '../sfx/1.ogg';
 import screen from '../sfx/2.ogg';
 import shift from '../sfx/3.ogg';
 import tetris from '../sfx/4.ogg';
+import rotate from '../sfx/5.ogg';
+import levelup from '../sfx/6.ogg';
+import lock from '../sfx/7.ogg';
+import clear from '../sfx/8.ogg';
+import complete from '../sfx/9.ogg';
 
 // @ts-ignore
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -15,6 +20,12 @@ const clips = [
     screen,
     shift,
     tetris,
+    rotate,
+    levelup,
+    lock,
+    null,
+    clear,
+    complete,
 ].map((clipView: Uint8Array) => {
     const clip: {
         playing: boolean,
