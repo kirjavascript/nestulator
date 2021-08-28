@@ -15,7 +15,7 @@ export default class TetrisBus implements BusInterface {
     joyIndex: number = 0;
     backgroundDirty: boolean = false;
     backgroundDisplay: boolean = true;
-    sfx: Set<number> = new Set();
+    sfx: number = 0;
     constructor(nes: NES) {
         this.nes = nes;
     }
@@ -69,7 +69,7 @@ export default class TetrisBus implements BusInterface {
     write(address: number, value: number): void {
         if (address === 0x6F1 && value !== 0) {
             // sound effect slot 1 init
-            this.sfx.add(value);
+            this.sfx = value;
             return;
         }
         if (address < 0x2000) {

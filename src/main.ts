@@ -13,6 +13,7 @@ import buildUI from './ui';
 // TODO: favicon
 // TODO: demo
 //
+// TODO: gnu's NSF AOT compiler
 // TODO: .pal input
 // TODO: recording (per game) / playback
 // TODO: seed find

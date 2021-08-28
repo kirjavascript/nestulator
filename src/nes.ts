@@ -84,6 +84,7 @@ export default class NES {
             const cpu = { ...this.cpu };
             const bus = { ...this.bus };
             this.cpuFrame(true);
+            playSFX(this);
             // rollback
             this.RAM = RAM;
             this.VRAM = VRAM;
@@ -91,8 +92,12 @@ export default class NES {
             Object.assign(this.cpu, cpu);
             Object.assign(this.cpu.state, state);
             this.bus.backgroundDirty = false;
+            this.bus.sfx = 0;
         } else {
             this.cpuFrame(shouldRender);
+            if (shouldRender) {
+                playSFX(this);
+            }
         }
     }
 
@@ -133,7 +138,6 @@ export default class NES {
         }
 
         if (shouldRender) {
-            playSFX(this);
             renderBG(this);
         }
 

@@ -62,14 +62,24 @@ const clips = [
 });
 
 export function playSFX(nes: NES) {
-    if (nes.bus.sfx.size) {
-        for (const number of nes.bus.sfx) {
-            if (clips[number - 1]) {
-                clips[number - 1].play();
-            } else {
-                console.error(number - 1);
-            }
+    if (nes.bus.sfx) {
+        if (clips[nes.bus.sfx - 1]) {
+            clips[nes.bus.sfx - 1].play();
+            // console.log(2, nes.bus.sfx);
+        } else {
+            console.error(nes.bus.sfx - 1);
         }
-        nes.bus.sfx.clear();
+        nes.bus.sfx = 0;
     }
+    // sfx: Set<number> = new Set();
+    // if (nes.bus.sfx.size) {
+    //     for (const number of nes.bus.sfx) {
+    //         if (clips[number - 1]) {
+    //             clips[number - 1].play();
+    //         } else {
+    //             console.error(number - 1);
+    //         }
+    //     }
+    //     nes.bus.sfx.clear();
+    // }
 }
