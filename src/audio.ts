@@ -26,32 +26,28 @@ const clips = [
     complete,
 ].map((clipView: Uint8Array) => {
     const clip: {
-        playing: boolean,
-        play: () => void,
+        getSource: () => AudioBufferSourceNode | undefined,
         source?: AudioBufferSourceNode,
     } = {
-        playing: false,
-        play: () => {
-            if (!clip.playing && clip.source) {
-                clip.playing = true;
-                clip.source.start();
+        getSource: () => {
+            if (clip.source) {
+                const { source } = clip;
+                clip.source = undefined;
+                createClip();
+                return source;
+            } else {
+                console.error('dropped sound');
             }
         },
     };
 
-    const createClip = (callback?: () => void) => {
-        context.decodeAudioData(clipView.buffer.slice(0))
+    const createClip = () => {
+        !clip.source && context.decodeAudioData(clipView.buffer.slice(0))
             .then(buffer => {
-                callback?.();
                 const source = context.createBufferSource();
                 source.buffer = buffer;
                 source.connect(context.destination);
                 clip.source = source;
-                source.addEventListener('ended', () => {
-                    createClip(() => {
-                        clip.playing = false;
-                    });
-                });
             })
             .catch(console.error);
     };
@@ -61,25 +57,21 @@ const clips = [
     return clip;
 });
 
+let currentSound: any;
+
 export function playSFX(nes: NES) {
     if (nes.bus.sfx) {
-        if (clips[nes.bus.sfx - 1]) {
-            clips[nes.bus.sfx - 1].play();
-            // console.log(2, nes.bus.sfx);
-        } else {
-            console.error(nes.bus.sfx - 1);
+        if (currentSound) {
+            currentSound.stop();
+            currentSound = null;
         }
+
+        const source = clips[nes.bus.sfx - 1].getSource();
+        if (source) {
+            currentSound = source;
+            currentSound.start();
+        }
+
         nes.bus.sfx = 0;
     }
-    // sfx: Set<number> = new Set();
-    // if (nes.bus.sfx.size) {
-    //     for (const number of nes.bus.sfx) {
-    //         if (clips[number - 1]) {
-    //             clips[number - 1].play();
-    //         } else {
-    //             console.error(number - 1);
-    //         }
-    //     }
-    //     nes.bus.sfx.clear();
-    // }
 }
