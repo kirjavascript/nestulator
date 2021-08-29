@@ -35,8 +35,6 @@ const clips = [
                 clip.source = undefined;
                 createClip();
                 return source;
-            } else {
-                console.error('dropped sound');
             }
         },
     };
@@ -70,6 +68,8 @@ export function playSFX(nes: NES) {
         if (source) {
             currentSound = source;
             currentSound.start();
+        } else {
+            console.error(`dropped sound ${nes.bus.sfx}`);
         }
 
         nes.bus.sfx = 0;

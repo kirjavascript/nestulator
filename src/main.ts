@@ -6,6 +6,7 @@ import buildUI from './ui';
     this emulator aims for good performance, with precise timing and gameplay mechanics for competitive play. the codebase is simple, hackable and embeddable
     this a rough first demo, feedback would be great
     nearly every ROM hack works, except tetrisgym (for now)
+    next step is probably recording
 
 */
 
