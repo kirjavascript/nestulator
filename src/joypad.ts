@@ -42,28 +42,21 @@ html.addEventListener('keyup', (e) => {
 
 const gamepads: { [index: number]: Gamepad } = {};
 
-function gamepadHandler(event: GamepadEvent, connecting: boolean) {
-    const gamepad = event.gamepad;
-    if (connecting) {
-        gamepads[gamepad.index] = gamepad;
-    } else {
-        delete gamepads[gamepad.index];
-    }
-}
-
 // @ts-ignore
 window.addEventListener(
     'gamepadconnected',
-    (e: GamepadEvent) => {
-        gamepadHandler(e, true);
+    (event: GamepadEvent) => {
+        const gamepad = event.gamepad;
+        gamepads[gamepad.index] = gamepad;
     },
     false,
 );
 // @ts-ignore
 window.addEventListener(
     'gamepaddisconnected',
-    (e: GamepadEvent) => {
-        gamepadHandler(e, false);
+    (event: GamepadEvent) => {
+        const gamepad = event.gamepad;
+        delete gamepads[gamepad.index];
     },
     false,
 );
