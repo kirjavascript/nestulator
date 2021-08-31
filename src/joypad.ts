@@ -1,7 +1,7 @@
 const controls: Set<number> = new Set([]);
 
-window.addEventListener('blur', controls.clear);
-window.addEventListener('focus', controls.clear);
+window.addEventListener('blur', () => controls.clear());
+window.addEventListener('focus', () => controls.clear());
 
 const keymap: { [key: string]: number } = {};
 

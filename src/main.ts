@@ -10,7 +10,10 @@ import buildUI from './ui';
 
 */
 
+// TODO: ram debugger
+// TODO: blackscreen bug
 // TODO: controls / joystick api
+// TODO: sound
 // TODO: favicon
 // TODO: demo
 //
