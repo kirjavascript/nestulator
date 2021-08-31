@@ -55,7 +55,7 @@ export default class NES {
 
         // region stuff
 
-        const dropTable = this.PRG[0x98E];
+        const dropTable = this.PRG[0x98e];
         if (dropTable === 0x30) {
             this.region = Region.NTSC;
         } else if (dropTable === 0x24) {
@@ -70,8 +70,8 @@ export default class NES {
 
         // patches
         if (this.region !== Region.GYM) {
-            this.PRG[0x1C89] = 0xFA; // maxout
-            this.PRG[0x180C] = 0x90; // fix colours
+            this.PRG[0x1c89] = 0xfa; // maxout
+            this.PRG[0x180c] = 0x90; // fix colours
         }
     }
 
@@ -97,7 +97,7 @@ export default class NES {
         }
     }
 
-    private cpuFrame(shouldRender: boolean){
+    private cpuFrame(shouldRender: boolean) {
         const totalCycles = this.baseCycles + (this.bus.frames & 1);
 
         this.bus.nmiChecked = false;
@@ -119,9 +119,10 @@ export default class NES {
             this.cpu.nmi();
         }
 
-        const afterCycles = this.RAM[0xC0] === 3
-            ? 1300 // workaround for level select screen bug
-            : nmiCycles;
+        const afterCycles =
+            this.RAM[0xc0] === 3
+                ? 1300 // workaround for level select screen bug
+                : nmiCycles;
 
         for (let i = 0; i < afterCycles; i++) {
             this.cpu.cycle();
@@ -139,5 +140,11 @@ export default class NES {
         }
 
         this.bus.frames++;
+
+        // workaround for blackscreen crash
+        if (this.RAM[0xc0] === 3 && this.PRG[this.cpu.state.p] === 106) {
+            this.cpu.state.p = 0x8005;
+            console.error('NES state was broken');
+        }
     }
 }

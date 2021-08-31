@@ -14,5 +14,4 @@ cons:
 * level select screen tile glitches on some ROM hacks
 * enter high score screen has a small tile glitch
 * rocket screen sprites appear above background
-* black screen when resetting sometimes (needs an extra start or F5 to fix)
 * no tetrisgym support 
