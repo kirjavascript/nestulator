@@ -10,12 +10,11 @@ import buildUI from './ui';
 
 */
 
-// TODO: blackscreen bug
 // TODO: controls / joystick api
-// TODO: sound
 // TODO: favicon
 // TODO: demo
 //
+// TODO: dropped sound
 // TODO: gnu's NSF AOT compiler
 // TODO: .pal input
 // TODO: recording (per game) / playback

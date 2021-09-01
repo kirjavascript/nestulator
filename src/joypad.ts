@@ -62,6 +62,7 @@ window.addEventListener(
 );
 
 export default function buttonIsDown(index: number) {
+    // TODO: refactor
     if (gamepads[0]) {
         if (index < 4) {
             return gamepads[0].buttons[index].pressed;
