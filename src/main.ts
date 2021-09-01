@@ -11,12 +11,10 @@ import buildUI from './ui';
 */
 
 // TODO: controls / joystick api
-// TODO: favicon
 // TODO: demo
 //
-// TODO: dropped sound
-// TODO: gnu's NSF AOT compiler
 // TODO: .pal input
+// TODO: gnu's NSF AOT compiler
 // TODO: recording (per game) / playback
 // TODO: seed find
 // perf: (tile caching, nametable write directly to UI, reduced cpu)

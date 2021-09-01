@@ -26,31 +26,26 @@ const clips = [
     complete,
 ].map((clipView: Uint8Array) => {
     const clip: {
-        getSource: () => AudioBufferSourceNode | undefined,
         source?: AudioBufferSourceNode,
+        createSource: (callback?: (source: AudioBufferSourceNode) => void) => void,
     } = {
-        getSource: () => {
-            if (clip.source) {
-                const { source } = clip;
-                clip.source = undefined;
-                createClip();
-                return source;
-            }
-        },
-    };
-
-    const createClip = () => {
-        !clip.source && context.decodeAudioData(clipView.buffer.slice(0))
+        createSource: (callback?: (source: AudioBufferSourceNode) => void) => {
+            !clip.source && context.decodeAudioData(clipView.buffer.slice(0))
             .then(buffer => {
                 const source = context.createBufferSource();
                 source.buffer = buffer;
                 source.connect(context.destination);
-                clip.source = source;
+                if (callback) {
+                    callback(source);
+                } else {
+                    clip.source = source;
+                }
             })
             .catch(console.error);
+        }
     };
 
-    createClip();
+    clip.createSource();
 
     return clip;
 });
@@ -64,12 +59,19 @@ export function playSFX(nes: NES) {
             currentSound = null;
         }
 
-        const source = clips[nes.bus.sfx - 1].getSource();
-        if (source) {
+        const clip = clips[nes.bus.sfx - 1];
+        if (clip.source) {
+            const { source } = clip;
+            clip.source = undefined;
             currentSound = source;
-            currentSound.start();
+            source.start();
+            clip.createSource();
         } else {
-            console.error(`dropped sound ${nes.bus.sfx}`);
+            console.warn(`sound ${nes.bus.sfx} wasn't cached`);
+            clip.createSource(source => {
+                currentSound = source
+                source.start();
+            });
         }
 
         nes.bus.sfx = 0;
