@@ -14,8 +14,8 @@ import buildUI from './ui';
 // TODO: demo
 //
 // TODO: .pal input
-// TODO: gnu's NSF AOT compiler
 // TODO: recording (per game) / playback
+// TODO: gnu's NSF AOT compiler
 // TODO: seed find
 // perf: (tile caching, nametable write directly to UI, reduced cpu)
 

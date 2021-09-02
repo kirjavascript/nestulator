@@ -80,3 +80,38 @@ export default function buttonIsDown(index: number) {
     }
     return controls.has(index);
 }
+
+// UDLRBASS
+
+function remap() {
+    const mapping = [];
+    const keydown = (e) => {
+        console.log('down');
+        addMapping(e.key);
+    };
+
+    html.addEventListener('keydown', keydown);
+
+    const interval = setInterval(() => {
+        // poll for gamepad presses
+    }, 100);
+
+
+    const dispose = () => {
+        console.log('dispose', mapping);
+        html.removeEventListener('keydown', keydown);
+        clearInterval(interval);
+    };
+
+    const addMapping = (key) => {
+        // TODO: if it exists, ignore
+        mapping.push(key);
+        if (mapping.length === 8) {
+            dispose();
+        }
+    };
+
+}
+
+
+remap();
