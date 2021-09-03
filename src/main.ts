@@ -8,9 +8,12 @@ import buildUI from './ui';
     nearly every ROM hack works, except tetrisgym (for now)
     next step is probably recording
 
+    pros / cons
+
 */
 
 // TODO: controls / joystick api
+// TODO: blackscreen: reset after game / remove hack
 // TODO: demo
 //
 // TODO: .pal input

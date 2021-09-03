@@ -39,8 +39,28 @@ html.addEventListener('keyup', (e) => {
     }
 });
 
+export default function buttonIsDown(index: number) {
+    return controls.has(index);
+}
 
-const gamepads: { [index: number]: Gamepad } = {};
+    // TODO: refactor
+    // if (gamepads[0]) {
+    //     if (index < 4) {
+    //         return gamepads[0].buttons[index].pressed;
+    //     } else {
+    //         if (index === 4) {
+    //             return gamepads[0].axes[1] === -1;
+    //         } else if (index === 5) {
+    //             return gamepads[0].axes[1] === 1;
+    //         } else if (index === 6) {
+    //             return gamepads[0].axes[0] === -1;
+    //         } else if (index === 7) {
+    //             return gamepads[0].axes[0] === 1;
+    //         }
+    //     }
+    // }
+
+const gamepads: Array<Gamepad> = [];
 
 // @ts-ignore
 window.addEventListener(
@@ -61,25 +81,6 @@ window.addEventListener(
     false,
 );
 
-export default function buttonIsDown(index: number) {
-    // TODO: refactor
-    if (gamepads[0]) {
-        if (index < 4) {
-            return gamepads[0].buttons[index].pressed;
-        } else {
-            if (index === 4) {
-                return gamepads[0].axes[1] === -1;
-            } else if (index === 5) {
-                return gamepads[0].axes[1] === 1;
-            } else if (index === 6) {
-                return gamepads[0].axes[0] === -1;
-            } else if (index === 7) {
-                return gamepads[0].axes[0] === 1;
-            }
-        }
-    }
-    return controls.has(index);
-}
 
 // UDLRBASS
 
@@ -94,8 +95,20 @@ function remap() {
 
     const interval = setInterval(() => {
         // poll for gamepad presses
+        for (let i = 0; i < gamepads.length; i++) {
+            const gamepad = gamepads[i];
+            const pressed = gamepad.buttons.findIndex(d => d.pressed);
+            if (pressed !== -1) {
+                console.log(pressed);
+                break;
+            }
+            const axes = gamepad.axes.findIndex(d => d !== 0);
+            if (axes !== -1) {
+                console.log(axes);
+                break;
+            }
+        }
     }, 100);
-
 
     const dispose = () => {
         console.log('dispose', mapping);
