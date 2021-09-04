@@ -81,14 +81,17 @@ window.addEventListener(
     false,
 );
 
-
 // UDLRBASS
 
 function remap() {
-    const mapping = [];
+    const keyMaps = {};
+    const padMaps = {};
+    let mapIndex = 0;
     const keydown = (e) => {
         console.log('down');
-        addMapping(e.key);
+        // addMapping(e.key);
+        keyMaps[mapIndex] = e.key;
+        addedMap();
     };
 
     html.addEventListener('keydown', keydown);
@@ -99,28 +102,26 @@ function remap() {
             const gamepad = gamepads[i];
             const pressed = gamepad.buttons.findIndex(d => d.pressed);
             if (pressed !== -1) {
-                console.log(pressed);
+                console.log(pressed, i);
+                padMaps[mapIndex] = [i, pressed];
+                addedMap();
                 break;
             }
-            const axes = gamepad.axes.findIndex(d => d !== 0);
+            const axes = gamepad.axes.findIndex(d => Math.abs(d) > 0.5);
             if (axes !== -1) {
-                console.log(axes);
+                padMaps[mapIndex] = [i, axes, gamepad.axes[axes]];
+                addedMap();
                 break;
             }
         }
     }, 100);
 
-    const dispose = () => {
-        console.log('dispose', mapping);
-        html.removeEventListener('keydown', keydown);
-        clearInterval(interval);
-    };
-
-    const addMapping = (key) => {
-        // TODO: if it exists, ignore
-        mapping.push(key);
-        if (mapping.length === 8) {
-            dispose();
+    const addedMap = () => {
+        mapIndex++;
+        if (mapIndex === 8) {
+            console.log('dispose', mapping);
+            html.removeEventListener('keydown', keydown);
+            clearInterval(interval);
         }
     };
 

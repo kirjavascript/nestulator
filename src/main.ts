@@ -13,7 +13,8 @@ import buildUI from './ui';
 */
 
 // TODO: controls / joystick api
-// TODO: blackscreen: reset after game / remove hack
+// TODO: blackscreen: gamemode -> lvl select | reset after game / remove hack
+// TODO: lag when tab isn't visible for a long time
 // TODO: demo
 //
 // TODO: .pal input
