@@ -43,23 +43,6 @@ export default function buttonIsDown(index: number) {
     return controls.has(index);
 }
 
-    // TODO: refactor
-    // if (gamepads[0]) {
-    //     if (index < 4) {
-    //         return gamepads[0].buttons[index].pressed;
-    //     } else {
-    //         if (index === 4) {
-    //             return gamepads[0].axes[1] === -1;
-    //         } else if (index === 5) {
-    //             return gamepads[0].axes[1] === 1;
-    //         } else if (index === 6) {
-    //             return gamepads[0].axes[0] === -1;
-    //         } else if (index === 7) {
-    //             return gamepads[0].axes[0] === 1;
-    //         }
-    //     }
-    // }
-
 const gamepads: Array<Gamepad> = [];
 
 // @ts-ignore
@@ -81,16 +64,18 @@ window.addEventListener(
     false,
 );
 
-// UDLRBASS
+// UDLRBASS for input
+// ABSSUDLR for output
+
+// TODO: change keymap to let
+const pinTranslate = [];
 
 function remap() {
-    const keyMaps = {};
+    const keyMaps: { [name: string]: number } = {};
     const padMaps = {};
     let mapIndex = 0;
-    const keydown = (e) => {
-        console.log('down');
-        // addMapping(e.key);
-        keyMaps[mapIndex] = e.key;
+    const keydown = (e: KeyboardEvent) => {
+        keyMaps[e.key] = mapIndex;
         addedMap();
     };
 
@@ -119,7 +104,8 @@ function remap() {
     const addedMap = () => {
         mapIndex++;
         if (mapIndex === 8) {
-            console.log('dispose', mapping);
+            // TODO: patch keyMaps onto keymap
+            console.log('dispose', keyMaps, padMaps);
             html.removeEventListener('keydown', keydown);
             clearInterval(interval);
         }
