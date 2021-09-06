@@ -3,7 +3,9 @@ const controls: Set<number> = new Set([]);
 window.addEventListener('blur', () => controls.clear());
 window.addEventListener('focus', () => controls.clear());
 
-const keymap: { [key: string]: number } = {};
+// reassigned in remaps()
+let keymap: { [key: string]: number } = {};
+let hasGamepad = false;
 
 [
     ['x', 'X', 'm', 'M'], // A
@@ -67,15 +69,14 @@ window.addEventListener(
 // UDLRBASS for input
 // ABSSUDLR for output
 
-// TODO: change keymap to let
-const pinTranslate = [];
+const pinLookup = [4, 5, 6, 7, 1, 0, 2, 3];
 
 function remap() {
-    const keyMaps: { [name: string]: number } = {};
-    const padMaps = {};
+    const keyRemaps: { [name: string]: number } = {};
+    const padRemaps = {};
     let mapIndex = 0;
     const keydown = (e: KeyboardEvent) => {
-        keyMaps[e.key] = mapIndex;
+        keyRemaps[e.key] = pinLookup[mapIndex];
         addedMap();
     };
 
@@ -88,13 +89,13 @@ function remap() {
             const pressed = gamepad.buttons.findIndex(d => d.pressed);
             if (pressed !== -1) {
                 console.log(pressed, i);
-                padMaps[mapIndex] = [i, pressed];
+                padRemaps[mapIndex] = [i, pressed];
                 addedMap();
                 break;
             }
             const axes = gamepad.axes.findIndex(d => Math.abs(d) > 0.5);
             if (axes !== -1) {
-                padMaps[mapIndex] = [i, axes, gamepad.axes[axes]];
+                padRemaps[mapIndex] = [i, axes, gamepad.axes[axes]];
                 addedMap();
                 break;
             }
@@ -104,10 +105,17 @@ function remap() {
     const addedMap = () => {
         mapIndex++;
         if (mapIndex === 8) {
-            // TODO: patch keyMaps onto keymap
-            console.log('dispose', keyMaps, padMaps);
             html.removeEventListener('keydown', keydown);
             clearInterval(interval);
+
+            keymap = keyRemaps;
+            if (Object.keys(padRemaps)) {
+                hasGamepad = true;
+                // TODO: gamepad stuff
+            } else {
+                hasGamepad = false;
+            }
+            console.log('dispose', keyRemaps, padRemaps);
         }
     };
 
