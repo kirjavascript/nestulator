@@ -55,7 +55,7 @@ export default function buildUI(nes: NES) {
             }
             debug.innerHTML = `PC: ${nes.cpu.state.p.toString(16)}\nframes: ${
                 nes.bus.frames
-            }\n${lines.join('\n')}`;
+            }\n${JSON.stringify(nes.cpu.state)}\n${lines.join('\n')}`;
         }
 
         const loop = () => {

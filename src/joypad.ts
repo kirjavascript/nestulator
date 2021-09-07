@@ -22,6 +22,8 @@ let hasGamepad = false;
     });
 });
 
+// keyboard
+
 const html = document.documentElement;
 
 html.addEventListener('keydown', (e) => {
@@ -45,6 +47,8 @@ export default function buttonIsDown(index: number) {
     return controls.has(index);
 }
 
+// gamepad
+
 const gamepads: Array<Gamepad> = [];
 
 // @ts-ignore
@@ -66,12 +70,15 @@ window.addEventListener(
     false,
 );
 
+// remapping
+
 // UDLRBASS for input
 // ABSSUDLR for output
 
+const buttonNames = ['Up', 'Down', 'Left', 'Right', 'B', 'A', 'Select', 'Start'];
 const pinLookup = [4, 5, 6, 7, 1, 0, 2, 3];
 
-function remap() {
+export function remap() {
     const keyRemaps: { [name: string]: number } = {};
     const padRemaps = {};
     let mapIndex = 0;
@@ -120,6 +127,3 @@ function remap() {
     };
 
 }
-
-
-remap();

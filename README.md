@@ -12,6 +12,5 @@ pros:
 cons / todo:
 
 * occasional small tile glitches on level select
-* sometimes get a blackscreen when moving from game mode to level select
 * rocket screen sprites appear above background
 * no tetrisgym support 

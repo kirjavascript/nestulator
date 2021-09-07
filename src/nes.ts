@@ -116,7 +116,14 @@ export default class NES {
 
         if (this.bus.nmiEnabled) {
             this.bus.vblank = true;
-            this.cpu.nmi();
+
+            // transitioning between gameMode and levelSelect blackscreens sometimes
+            // skipping nmi on a frame where this happens fixes it
+            // (this can definitely be improved)
+
+            if (this.RAM[0xc0] !== 3 || this.bus.frames % 60 !== 0) {
+                this.cpu.nmi();
+            }
         }
 
         const afterCycles =
@@ -129,7 +136,7 @@ export default class NES {
             // do nmi cycles... and some of the next frame
         }
 
-        // unless we align executionState rollback doesn work
+        // unless we align executionState rollback doesnt work
         while (this.cpu.executionState !== 1) {
             this.cpu.cycle();
         }
@@ -140,11 +147,5 @@ export default class NES {
         }
 
         this.bus.frames++;
-
-        // workaround for blackscreen crash
-        if (this.RAM[0xc0] === 3 && this.PRG[this.cpu.state.p] === 106) {
-            this.cpu.state.p = 0x8005;
-            console.error('NES state was broken');
-        }
     }
 }
