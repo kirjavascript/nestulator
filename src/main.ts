@@ -4,8 +4,7 @@ import buildUI from './ui';
 /*
     to make an emulator with strong anti cheat, you need to first make an emulator that people want to actually use
     this emulator aims for good performance, with precise timing and gameplay mechanics for competitive play. the codebase is simple, hackable and embeddable
-    this a public beta, to get feedback on how viable the emulator is
-    nearly every ROM hack works, except tetrisgym (for now)
+    this a public beta, to get feedback on how viable the emulator is - nearly every ROM hack works
     next step is probably recording
 
     pros / cons
@@ -13,20 +12,13 @@ import buildUI from './ui';
 */
 
 // TODO: controls / joystick api
-// TODO: blackscreen:
-//        gamemode -> lvl select | reset after game / remove hack
-//        disabling nmi fixes it, just need to detect
 // TODO: demo
 //
-// TODO: provide ROM url via location.search
-// https://web.archive.org/web/20210714180839/http://snk.digibase.ca/tetrisroms/NTSC.nes
-//
 // TODO: anticheat: https://www.youtube.com/watch?v=mwTzNwp4tHY
-// TODO: .pal input
 // TODO: recording (per game) / playback
-// TODO: gnu's NSF AOT compiler
-// TODO: seed find
-// perf: (tile caching, nametable write directly to UI, reduced cpu)
+// TODO: seed finder
+// perf ideas: (tile caching, nametable write directly to UI, reduced cpu)
+// https://web.archive.org/web/20210714180839/http://snk.digibase.ca/tetrisroms/NTSC.nes
 
 const nes = new NES();
 window.nes = nes;

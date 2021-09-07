@@ -1,17 +1,14 @@
 import NES from './nes';
 
 export default function buildUI(nes: NES) {
+    // load ROM from storage
+
     const rom = window.localStorage.getItem('ROM');
     if (rom?.length) {
         nes.setROM(Uint8Array.from(JSON.parse(rom)));
     }
 
-    (document.querySelector('#fullscreen') as HTMLButtonElement)
-        .addEventListener('click', () => {
-            (document.querySelector('.screen') as HTMLDivElement)
-            .requestFullscreen()
-            .catch(console.error);
-        });
+    // change ROM
 
     (document.querySelector('#file') as HTMLInputElement)
         .addEventListener('change', (e: any) => {
@@ -26,11 +23,32 @@ export default function buildUI(nes: NES) {
             e.preventDefault();
         });
 
+    // fullscreen
+
+    (document.querySelector('#fullscreen') as HTMLButtonElement)
+        .addEventListener('click', () => {
+            (document.querySelector('.screen') as HTMLDivElement)
+            .requestFullscreen()
+            .catch(console.error);
+        });
+
+    // runahead
+
     const runaheadBox = document.querySelector('#runahead') as HTMLInputElement;
     runaheadBox.addEventListener('click', e => {
         nes.runahead = (e.target as HTMLInputElement).checked;
     });
     nes.runahead = runaheadBox.checked;
+
+    // input mapping
+
+    const controlText = document.querySelector('#controls') as HTMLParagraphElement;
+    (document.querySelector('#input') as HTMLButtonElement)
+        .addEventListener('click', () => {
+            nes.running = false;
+
+            nes.running = true;
+        });
 
     window.debug = () => {
         const debug = (document.querySelector('main') as HTMLElement)
