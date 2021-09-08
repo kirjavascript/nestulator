@@ -68,17 +68,15 @@ window.addEventListener(
     false,
 );
 
-window.G = gamepads;
-
 export default function buttonIsDown(index: number) {
     if (padmap && index in padmap) {
         const mapping = padmap[index];
         if (mapping.length === 2) {
             const [gamepad, button] = mapping;
-            return gamepads[gamepad].buttons[button].pressed;
+            return gamepads[gamepad]?.buttons[button].pressed;
         } else if (mapping.length === 3) {
             const [gamepad, axis, direction] = mapping;
-            return Math.round(gamepads[gamepad].axes[axis]) === direction;
+            return Math.round(gamepads[gamepad]?.axes[axis]) === direction;
         }
     }
     return controls.has(index);
