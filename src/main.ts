@@ -11,10 +11,9 @@ import buildUI from './ui';
 
 */
 
-// TODO: doubleclick for fullscreen
 // TODO: controls / joystick api
-//     mapping display
 //     gamepad
+//     ignore existing gamepad buttons
 //     localstorage
 // TODO: demo
 //

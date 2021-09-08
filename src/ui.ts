@@ -52,8 +52,8 @@ export default function buildUI(nes: NES) {
                 setText: (text) => {
                     controlText.textContent = text;
                 },
-                onComplete: () => {
-                    controlText.textContent = '[show mapping here]';
+                onComplete: (mapText) => {
+                    controlText.textContent = '';
                     nes.running = true;
                 },
             });

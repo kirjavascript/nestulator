@@ -5,6 +5,7 @@ window.addEventListener('focus', () => controls.clear());
 
 // reassigned in remaps()
 let keymap: { [key: string]: number } = {};
+// let padmap: { [
 let hasGamepad = false;
 
 [
@@ -86,8 +87,10 @@ export function remap({ setText, onComplete }: {
     const padRemaps = {};
     let mapIndex = 0;
     const keydown = (e: KeyboardEvent) => {
-        keyRemaps[e.key] = pinLookup[mapIndex];
-        addedMap();
+        if (!(e.key in keyRemaps)) {
+            keyRemaps[e.key] = pinLookup[mapIndex];
+            addedMap();
+        }
     };
 
     html.addEventListener('keydown', keydown);
@@ -118,6 +121,7 @@ export function remap({ setText, onComplete }: {
     showMessage();
 
     const addedMap = () => {
+        console.log(padRemaps);
         mapIndex++;
         if (mapIndex === 8) {
             html.removeEventListener('keydown', keydown);
