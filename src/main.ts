@@ -13,6 +13,9 @@ import buildUI from './ui';
 
 // TODO: doubleclick for fullscreen
 // TODO: controls / joystick api
+//     mapping display
+//     gamepad
+//     localstorage
 // TODO: demo
 //
 // TODO: anticheat: https://www.youtube.com/watch?v=mwTzNwp4tHY

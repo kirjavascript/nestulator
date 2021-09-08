@@ -26,12 +26,13 @@ export default function buildUI(nes: NES) {
 
     // fullscreen
 
+    const screen = document.querySelector('.screen') as HTMLDivElement
+    function fullscreen() {
+        screen.requestFullscreen().catch(console.error);
+    }
     (document.querySelector('#fullscreen') as HTMLButtonElement)
-        .addEventListener('click', () => {
-            (document.querySelector('.screen') as HTMLDivElement)
-            .requestFullscreen()
-            .catch(console.error);
-        });
+        .addEventListener('click', fullscreen);
+    screen.addEventListener('dblclick', fullscreen);
 
     // runahead
 
