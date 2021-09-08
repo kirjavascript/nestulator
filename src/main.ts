@@ -12,8 +12,7 @@ import buildUI from './ui';
 */
 
 // TODO: controls / joystick api
-//     gamepad
-//     ignore existing gamepad buttons
+//     gamepad / ignore existing gamepad buttons
 //     localstorage
 // TODO: demo
 //

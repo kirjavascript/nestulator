@@ -76,15 +76,31 @@ window.addEventListener(
 // UDLRBASS for input
 // ABSSUDLR for output
 
-const buttonNames = ['Up', 'Down', 'Left', 'Right', 'B', 'A', 'Select', 'Start'];
+const buttonNames = [
+    'Up',
+    'Down',
+    'Left',
+    'Right',
+    'B',
+    'A',
+    'Select',
+    'Start',
+];
 const pinLookup = [4, 5, 6, 7, 1, 0, 2, 3];
 
-export function remap({ setText, onComplete }: {
-    setText: (text: string) => void,
-    onComplete: () => void,
+export function remap({
+    setText,
+    onComplete,
+}: {
+    setText: (text: string) => void;
+    onComplete: () => void;
 }) {
     const keyRemaps: { [name: string]: number } = {};
-    const padRemaps = {};
+    const padRemaps: {
+        buttons: { [mapIndex: number]: [number, number] };
+        axes: { [mapIndex: number]: [number, number, number] };
+    } = { buttons: {}, axes: {} };
+
     let mapIndex = 0;
     const keydown = (e: KeyboardEvent) => {
         if (!(e.key in keyRemaps)) {
@@ -99,18 +115,27 @@ export function remap({ setText, onComplete }: {
         // poll for gamepad presses
         for (let i = 0; i < gamepads.length; i++) {
             const gamepad = gamepads[i];
-            const pressed = gamepad.buttons.findIndex(d => d.pressed);
+            const pressed = gamepad.buttons.findIndex((d) => d.pressed);
             if (pressed !== -1) {
-                console.log(pressed, i);
-                padRemaps[mapIndex] = [i, pressed];
-                addedMap();
-                break;
+                const alreadyPressed = Object.values(padRemaps.buttons).some(
+                    ([_, alreadyPressed]) => alreadyPressed === pressed,
+                );
+                if (!alreadyPressed) {
+                    padRemaps.buttons[mapIndex] = [i, pressed];
+                    addedMap();
+                    break;
+                }
             }
-            const axes = gamepad.axes.findIndex(d => Math.abs(d) > 0.5);
+            const axes = gamepad.axes.findIndex((d) => Math.abs(d) > 0.5);
             if (axes !== -1) {
-                padRemaps[mapIndex] = [i, axes, gamepad.axes[axes]];
-                addedMap();
-                break;
+                const alreadyTilted = Object.values(padRemaps.axes).some(
+                    ([_, alreadyTilted]) => alreadyTilted === axes,
+                );
+                if (!alreadyTilted) {
+                    padRemaps.axes[mapIndex] = [i, axes, gamepad.axes[axes]];
+                    addedMap();
+                    break;
+                }
             }
         }
     }, 100);
@@ -139,5 +164,4 @@ export function remap({ setText, onComplete }: {
             showMessage();
         }
     };
-
 }
