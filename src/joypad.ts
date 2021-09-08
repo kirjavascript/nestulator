@@ -5,8 +5,9 @@ window.addEventListener('focus', () => controls.clear());
 
 // reassigned in remaps()
 let keymap: { [key: string]: number } = {};
-// let padmap: { [
-let hasGamepad = false;
+let padmap:
+    | undefined
+    | { [mapIndex: number]: [number, number, number?] } = undefined;
 
 [
     ['x', 'X', 'm', 'M'], // A
@@ -44,10 +45,6 @@ html.addEventListener('keyup', (e) => {
     }
 });
 
-export default function buttonIsDown(index: number) {
-    return controls.has(index);
-}
-
 // gamepad
 
 const gamepads: Array<Gamepad> = [];
@@ -70,6 +67,22 @@ window.addEventListener(
     },
     false,
 );
+
+window.G = gamepads;
+
+export default function buttonIsDown(index: number) {
+    if (padmap && index in padmap) {
+        const mapping = padmap[index];
+        if (mapping.length === 2) {
+            const [gamepad, button] = mapping;
+            return gamepads[gamepad].buttons[button].pressed;
+        } else if (mapping.length === 3) {
+            const [gamepad, axis, direction] = mapping;
+            return Math.round(gamepads[gamepad].axes[axis]) === direction;
+        }
+    }
+    return controls.has(index);
+}
 
 // remapping
 
@@ -96,10 +109,7 @@ export function remap({
     onComplete: () => void;
 }) {
     const keyRemaps: { [name: string]: number } = {};
-    const padRemaps: {
-        buttons: { [mapIndex: number]: [number, number] };
-        axes: { [mapIndex: number]: [number, number, number] };
-    } = { buttons: {}, axes: {} };
+    const padRemaps: { [mapIndex: number]: [number, number, number?] } = {};
 
     let mapIndex = 0;
     const keydown = (e: KeyboardEvent) => {
@@ -117,22 +127,27 @@ export function remap({
             const gamepad = gamepads[i];
             const pressed = gamepad.buttons.findIndex((d) => d.pressed);
             if (pressed !== -1) {
-                const alreadyPressed = Object.values(padRemaps.buttons).some(
-                    ([_, alreadyPressed]) => alreadyPressed === pressed,
-                );
+                const alreadyPressed = Object.values(padRemaps)
+                    .filter((d) => d.length === 2)
+                    .some(([_, alreadyPressed]) => alreadyPressed === pressed);
                 if (!alreadyPressed) {
-                    padRemaps.buttons[mapIndex] = [i, pressed];
+                    padRemaps[pinLookup[mapIndex]] = [i, pressed];
                     addedMap();
                     break;
                 }
             }
-            const axes = gamepad.axes.findIndex((d) => Math.abs(d) > 0.5);
+            const axes = gamepad.axes.findIndex((d) => Math.abs(d) > 0.51);
             if (axes !== -1) {
-                const alreadyTilted = Object.values(padRemaps.axes).some(
-                    ([_, alreadyTilted]) => alreadyTilted === axes,
-                );
+                const direction = Math.round(gamepad.axes[axes]);
+                const alreadyTilted = Object.values(padRemaps)
+                    .filter((d) => d.length === 3)
+                    .some(
+                        ([_, alreadyTilted, alreadyDir]) =>
+                            alreadyTilted === axes && alreadyDir === direction,
+                    );
+
                 if (!alreadyTilted) {
-                    padRemaps.axes[mapIndex] = [i, axes, gamepad.axes[axes]];
+                    padRemaps[pinLookup[mapIndex]] = [i, axes, direction];
                     addedMap();
                     break;
                 }
@@ -146,18 +161,17 @@ export function remap({
     showMessage();
 
     const addedMap = () => {
-        console.log(padRemaps);
         mapIndex++;
         if (mapIndex === 8) {
             html.removeEventListener('keydown', keydown);
             clearInterval(interval);
 
+            controls.clear();
             keymap = keyRemaps;
             if (Object.keys(padRemaps)) {
-                hasGamepad = true;
-                // TODO: gamepad stuff
+                padmap = padRemaps;
             } else {
-                hasGamepad = false;
+                padmap = undefined;
             }
             onComplete();
         } else {
