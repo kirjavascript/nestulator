@@ -78,7 +78,10 @@ window.addEventListener(
 const buttonNames = ['Up', 'Down', 'Left', 'Right', 'B', 'A', 'Select', 'Start'];
 const pinLookup = [4, 5, 6, 7, 1, 0, 2, 3];
 
-export function remap() {
+export function remap({ setText, onComplete }: {
+    setText: (text: string) => void,
+    onComplete: () => void,
+}) {
     const keyRemaps: { [name: string]: number } = {};
     const padRemaps = {};
     let mapIndex = 0;
@@ -109,6 +112,11 @@ export function remap() {
         }
     }, 100);
 
+    const showMessage = () => {
+        setText(`Enter input for ${buttonNames[mapIndex]}`);
+    };
+    showMessage();
+
     const addedMap = () => {
         mapIndex++;
         if (mapIndex === 8) {
@@ -122,7 +130,9 @@ export function remap() {
             } else {
                 hasGamepad = false;
             }
-            console.log('dispose', keyRemaps, padRemaps);
+            onComplete();
+        } else {
+            showMessage();
         }
     };
 

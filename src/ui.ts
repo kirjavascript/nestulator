@@ -1,4 +1,5 @@
 import NES from './nes';
+import { remap } from './joypad';
 
 export default function buildUI(nes: NES) {
     // load ROM from storage
@@ -46,8 +47,15 @@ export default function buildUI(nes: NES) {
     (document.querySelector('#input') as HTMLButtonElement)
         .addEventListener('click', () => {
             nes.running = false;
-
-            nes.running = true;
+            remap({
+                setText: (text) => {
+                    controlText.textContent = text;
+                },
+                onComplete: () => {
+                    controlText.textContent = '[show mapping here]';
+                    nes.running = true;
+                },
+            });
         });
 
     window.debug = () => {

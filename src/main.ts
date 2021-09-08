@@ -11,6 +11,7 @@ import buildUI from './ui';
 
 */
 
+// TODO: doubleclick for fullscreen
 // TODO: controls / joystick api
 // TODO: demo
 //
