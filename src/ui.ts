@@ -52,7 +52,7 @@ export default function buildUI(nes: NES) {
                 setText: (text) => {
                     controlText.textContent = text;
                 },
-                onComplete: (mapText) => {
+                onComplete: () => {
                     controlText.textContent = '';
                     nes.running = true;
                 },

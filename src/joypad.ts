@@ -24,6 +24,14 @@ let padmap:
     });
 });
 
+const savedControls = window.localStorage.getItem('controls');
+if (savedControls) {
+    const controlData = JSON.parse(savedControls);
+    keymap = controlData.keymap;
+    padmap = controlData.padmap;
+    (document.querySelector('#controls') as HTMLParagraphElement).textContent = '';
+}
+
 // keyboard
 
 const html = document.documentElement;
@@ -171,6 +179,14 @@ export function remap({
             } else {
                 padmap = undefined;
             }
+
+            window.localStorage.setItem(
+                'controls',
+                JSON.stringify({
+                    keymap,
+                    padmap,
+                }),
+            );
             onComplete();
         } else {
             showMessage();

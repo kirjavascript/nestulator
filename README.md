@@ -1,9 +1,11 @@
 fast & accurate nestris emulator for competitive play
 
+### [play online](https://kirjava.xyz/nestulator)
+
 pros:
 
 * gameplay mechanics and timing are precise
-* input latency is minimal with runahead 
+* near zero latency with runahead 
 * low processing / memory usage via HLE
 * maxout code auto-applied
 * runs nearly everywhere
