@@ -10,7 +10,8 @@ pros:
 * low processing / memory usage via HLE
 * maxout code auto-applied
 * runs nearly everywhere
-* easy to use / zero config
+* easy to use / zero config 
+* gamepad support
 * NTSC / PAL support
 
 cons / todo:

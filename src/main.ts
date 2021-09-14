@@ -1,15 +1,22 @@
 import NES from './nes';
 import buildUI from './ui';
 
+// TODO: detect rocket screen, swap layers
+// TODO: fix eric's/erens issue
+
+// TODO: video recording
+// TODO: QR at end of game
 // TODO: anticheat: https://www.youtube.com/watch?v=mwTzNwp4tHY
 // TODO: recording (per game) / playback
-// perf ideas: (tile caching, nametable write directly to UI, reduced cpu)
+// perf ideas: (tile caching, nametable write directly to UI, webgl, reduced cpu)
 // https://web.archive.org/web/20210714180839/http://snk.digibase.ca/tetrisroms/NTSC.nes
 
 const nes = new NES();
 window.nes = nes;
 
 buildUI(nes);
+
+nes.framerate = 0.005;
 
 const frameCount = document.querySelector('.frameCount') as HTMLSpanElement;
 const epoch = performance.now();
