@@ -21,19 +21,27 @@ sprites.height = 240;
 const spCtx = sprites.getContext('2d') as CanvasRenderingContext2D;
 sprites.style.backgroundColor = 'transparent';
 
-// let nt1;
-// let nt2;
+// nt runahead saving
+
+let ntCursor;
+let ntTiles;
 
 export default class TetrisGfx {
     storeNTUpdates(nes: NES) {
-        // nt1 =[]
-        // nt2 = [];
-        // for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
-        //     const cursor = nes.ntUpdates[ntIndex];
-
-        // }
+        ntCursor = []
+        ntTiles = [];
+        for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
+            const cursor = xyLookup[nes.ntUpdates[ntIndex]];
+            ntCursor.push(cursor);
+            ntTiles.push(ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8));
+        }
     }
     restoreNTUpdates(nes: NES) {
+        for (let ntIndex = 0; ntIndex < ntCursor.length; ntIndex++) {
+            const cursor = ntCursor[ntIndex];
+            const tile = ntTiles[ntIndex];
+            ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);
+        }
     }
 
     public renderBG(nes: NES) {
@@ -45,6 +53,7 @@ export default class TetrisGfx {
         if (nes.bus.backgroundDirty) {
             nes.ntUpdates = allTiles;
             nes.bus.backgroundDirty = false;
+            console.log('dirty');
         }
         if (nes.ntUpdates.length === 0) return;
 
