@@ -8,15 +8,28 @@ const ctx = background.getContext('2d') as CanvasRenderingContext2D;
 
 const buffer = ctx.createImageData(8, 8);
 
-const xyLookup = [...Array(960).keys()].map(i => [i % 32, 0 | i / 32]);
+const allTiles = [...Array(960).keys()];
+const xyLookup = allTiles.map(i => [i % 32, 0 | i / 32]);
 
 export function renderBG(nes: NES) {
-    // if (!nes.bus.backgroundDirty) return;
-    // nes.bus.backgroundDirty = false;
-    // if (!nes.bus.backgroundDisplay) {
-    //     ctx.clearRect(0, 0, background.width, background.height);
-    //     return;
-    // }
+    if (!nes.bus.backgroundDisplay) {
+        ctx.clearRect(0, 0, background.width, background.height);
+        return;
+    }
+
+    // PPUwrite (0x2007 :
+    //
+    // 0x8b = render mode
+
+            // if (!this.backgroundDirty && ((addr >= 0x2000 && addr < 0x2fc0) || (addr === 0x3f0e && this.nes.RAM[0x56] === 4))) {
+            //     // 0x3f0c captures the tetris flashing while you have completed 4 lines
+            //     this.backgroundDirty = true;
+            // }
+
+    if (nes.bus.backgroundDirty) {
+        nes.ntUpdates = allTiles;
+        nes.bus.backgroundDirty = false;
+    }
     if (nes.ntUpdates.length === 0) return;
 
     const palettes = [

@@ -74,7 +74,7 @@ export default class NES {
             this.PRG[0x1c89] = 0xfa; // maxout
             this.PRG[0x180c] = 0x90; // fix colours
             // this.PRG[0x1a91] = 0x0; // auto win
-            // this.PRG[0x1bec] = 0xa5; // transition
+            this.PRG[0x1bec] = 0xa5; // transition
         }
     }
 
@@ -103,8 +103,7 @@ export default class NES {
     private cpuFrame(shouldRender: boolean) {
         const totalCycles = this.baseCycles + (this.bus.frames & 1);
 
-        // TODO: replace background dirty
-        this.ntUpdates.splice(0, this.ntUpdates.length);
+        this.ntUpdates = [];
 
         this.bus.nmiChecked = false;
         this.bus.vblank = false;
@@ -150,7 +149,6 @@ export default class NES {
         if (shouldRender) {
             playSFX(this);
             renderBG(this);
-            // console.log(this.ntUpdates);
         }
 
         this.bus.frames++;

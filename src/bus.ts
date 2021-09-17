@@ -102,6 +102,7 @@ export default class TetrisBus implements BusInterface {
             return;
         }
         if (address === 0x2006) {
+            // PPUADDR
             if (this.ppuAddrIndex === 0) {
                 this.ppuAddr = value;
             } else {
@@ -111,13 +112,9 @@ export default class TetrisBus implements BusInterface {
             return;
         }
         if (address === 0x2007) {
+            // PPUDATA
             const addr = this.ppuAddr & 0x3fff;
             this.nes.VRAM[addr] = value;
-            // if (!this.backgroundDirty && ((addr >= 0x2000 && addr < 0x2fc0) || (addr === 0x3f0e && this.nes.RAM[0x56] === 4))) {
-            //     // 0x3f0c captures the tetris flashing while you have completed 4 lines
-            //     this.backgroundDirty = true;
-            // }
-
             if (addr >= 0x2000 && addr < 0x23C0) {
                 this.nes.ntUpdates.push(addr - 0x2000);
             }
