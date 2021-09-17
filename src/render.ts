@@ -8,13 +8,16 @@ const ctx = background.getContext('2d') as CanvasRenderingContext2D;
 
 const buffer = ctx.createImageData(8, 8);
 
+const xyLookup = [...Array(960).keys()].map(i => [i % 32, 0 | i / 32]);
+
 export function renderBG(nes: NES) {
-    if (!nes.bus.backgroundDirty) return;
-    nes.bus.backgroundDirty = false;
-    if (!nes.bus.backgroundDisplay) {
-        ctx.clearRect(0, 0, background.width, background.height);
-        return;
-    }
+    // if (!nes.bus.backgroundDirty) return;
+    // nes.bus.backgroundDirty = false;
+    // if (!nes.bus.backgroundDisplay) {
+    //     ctx.clearRect(0, 0, background.width, background.height);
+    //     return;
+    // }
+    if (nes.ntUpdates.length === 0) return;
 
     const palettes = [
         nes.VRAM.slice(0x3f00, 0x3f04),
@@ -25,35 +28,35 @@ export function renderBG(nes: NES) {
 
     background.style.backgroundColor = paletteHex[palettes[0][0]];
 
-    let cursor = 0;
-    for (let y = 0; y < background.height / 8; y++) {
-        for (let x = 0; x < background.width / 8; x++) {
-            const tile = nes.VRAM[0x2000 + cursor++];
+    for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
+        const cursor = nes.ntUpdates[ntIndex];
+        const x = xyLookup[cursor][0];
+        const y = xyLookup[cursor][1];
+        const tile = nes.VRAM[0x2000 + cursor];
 
-            const attrIndex =
-                Math.floor(x / 4) + (Math.floor(y / 4) * 8) + 0x23c0;
-            const attr = nes.VRAM[attrIndex];
-            const shift = ((x/2 & 1) * 2) + ((y/2 & 1) * 4);
-            const paletteLine = (attr >> shift) & 0b11;
-            const palette = palettes[paletteLine];
+        const attrIndex =
+            Math.floor(x / 4) + (Math.floor(y / 4) * 8) + 0x23c0;
+        const attr = nes.VRAM[attrIndex];
+        const shift = ((x/2 & 1) * 2) + ((y/2 & 1) * 4);
+        const paletteLine = (attr >> shift) & 0b11;
+        const palette = palettes[paletteLine];
 
-            const pixels = nes.tiles[tile + (nes.bus.chr0 * 0x100)];
+        const pixels = nes.tiles[tile + (nes.bus.chr0 * 0x100)];
 
-            for (let i = 0; i < 64; i++) {
-                const pixel = pixels[i];
-                if (pixel !== 0) { // can ignore transparent pixels
-                    const color = paletteRGB[palette[pixel]];
-                    buffer.data[i * 4 + 0] = color[0];
-                    buffer.data[i * 4 + 1] = color[1];
-                    buffer.data[i * 4 + 2] = color[2];
-                    buffer.data[i * 4 + 3] = 255;
-                } else {
-                    buffer.data[i * 4 + 3] = 0;
-                }
+        for (let i = 0; i < 64; i++) {
+            const pixel = pixels[i];
+            if (pixel !== 0) { // can ignore transparent pixels
+                const color = paletteRGB[palette[pixel]];
+                buffer.data[i * 4 + 0] = color[0];
+                buffer.data[i * 4 + 1] = color[1];
+                buffer.data[i * 4 + 2] = color[2];
+                buffer.data[i * 4 + 3] = 255;
+            } else {
+                buffer.data[i * 4 + 3] = 0;
             }
-
-            ctx.putImageData(buffer, x * 8, y * 8);
         }
+
+        ctx.putImageData(buffer, x * 8, y * 8);
     }
 }
 

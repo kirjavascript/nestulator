@@ -29,8 +29,12 @@ import buildUI from './ui';
 // debug.text = 'test'
 // debug.position.set(10, 50);
 // stage.addChild(debug);
+//
+// renderer.render(stage);
 
 // TODO: fix eric's/erens issue
+// TODO: NY updates
+// TODO: tetrus flash with another layer
 // TODO: detect rocket screen, swap layers
 // TODO: video recording
 // TODO: QR at end of game
@@ -51,8 +55,6 @@ const epoch = performance.now();
 let framesDone = 0;
 const loop = () => {
     requestAnimationFrame(loop);
-
-    // renderer.render(stage);
 
     const diff = performance.now() - epoch;
     const frames = diff * nes.framerate | 0;

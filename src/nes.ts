@@ -19,6 +19,7 @@ export default class NES {
     RAM: Uint8Array = new Uint8Array(0x2000);
     VRAM: Uint8Array = new Uint8Array(0x4000);
     tiles: Array<Array<number>> = [];
+    ntUpdates: Array<number> = [];
     region: Region = Region.NTSC;
     framerate!: number;
     baseCycles!: number;
@@ -72,6 +73,8 @@ export default class NES {
         if (this.region !== Region.GYM) {
             this.PRG[0x1c89] = 0xfa; // maxout
             this.PRG[0x180c] = 0x90; // fix colours
+            // this.PRG[0x1a91] = 0x0; // auto win
+            // this.PRG[0x1bec] = 0xa5; // transition
         }
     }
 
@@ -79,14 +82,14 @@ export default class NES {
         if (shouldRender && this.runahead) {
             this.cpuFrame(false);
             const RAM = this.RAM.slice(0);
-            // const VRAM = this.VRAM.slice(0);
+            const VRAM = this.VRAM.slice(0);
             const state = Object.assign({}, this.cpu.state);
             const cpu = Object.assign({}, this.cpu);
             const bus = Object.assign({}, this.bus);
             this.cpuFrame(true);
             // rollback
             this.RAM = RAM;
-            // this.VRAM = VRAM;
+            this.VRAM = VRAM;
             Object.assign(this.bus, bus);
             Object.assign(this.cpu, cpu);
             Object.assign(this.cpu.state, state);
@@ -99,6 +102,9 @@ export default class NES {
 
     private cpuFrame(shouldRender: boolean) {
         const totalCycles = this.baseCycles + (this.bus.frames & 1);
+
+        // TODO: replace background dirty
+        this.ntUpdates.splice(0, this.ntUpdates.length);
 
         this.bus.nmiChecked = false;
         this.bus.vblank = false;
@@ -144,6 +150,7 @@ export default class NES {
         if (shouldRender) {
             playSFX(this);
             renderBG(this);
+            // console.log(this.ntUpdates);
         }
 
         this.bus.frames++;
