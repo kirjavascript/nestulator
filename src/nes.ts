@@ -1,6 +1,6 @@
 import StateMachineCpu from '6502.ts/lib/machine/cpu/StateMachineCpu';
 import TetrisBus from './bus';
-import { renderBG, renderSprites } from './render';
+import TetrisGfx from './gfx';
 import { playSFX } from './audio';
 
 const nmiCycles = 2273;
@@ -14,6 +14,7 @@ export enum Region {
 export default class NES {
     cpu: StateMachineCpu;
     bus: TetrisBus;
+    gfx: TetrisGfx;
     PRG!: Uint8Array;
     CHR!: Uint8Array;
     RAM: Uint8Array = new Uint8Array(0x2000);
@@ -27,6 +28,7 @@ export default class NES {
     runahead: boolean = true;
 
     public constructor(ROM: Uint8Array = new Uint8Array()) {
+        this.gfx = new TetrisGfx();
         this.bus = new TetrisBus(this);
         this.cpu = new StateMachineCpu(this.bus);
         this.setROM(ROM);
@@ -82,6 +84,7 @@ export default class NES {
         if (shouldRender && this.runahead) {
             this.cpuFrame(false);
             const RAM = this.RAM.slice(0);
+            this.gfx.storeNTUpdates(this);
             // const VRAM = this.VRAM.slice(0);
             const state = Object.assign({}, this.cpu.state);
             const cpu = Object.assign({}, this.cpu);
@@ -90,6 +93,7 @@ export default class NES {
             // rollback
             this.RAM = RAM;
             // this.VRAM = VRAM;
+            this.gfx.restoreNTUpdates(this);
             Object.assign(this.bus, bus);
             Object.assign(this.cpu, cpu);
             Object.assign(this.cpu.state, state);
@@ -116,7 +120,7 @@ export default class NES {
         }
 
         if (shouldRender) {
-            renderSprites(this);
+            this.gfx.renderSprites(this);
         }
 
         if (this.bus.nmiEnabled) {
@@ -148,7 +152,7 @@ export default class NES {
 
         if (shouldRender) {
             playSFX(this);
-            renderBG(this);
+            this.gfx.renderBG(this);
         }
 
         this.bus.frames++;
