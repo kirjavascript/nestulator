@@ -82,14 +82,14 @@ export default class NES {
         if (shouldRender && this.runahead) {
             this.cpuFrame(false);
             const RAM = this.RAM.slice(0);
-            const VRAM = this.VRAM.slice(0);
+            // const VRAM = this.VRAM.slice(0);
             const state = Object.assign({}, this.cpu.state);
             const cpu = Object.assign({}, this.cpu);
             const bus = Object.assign({}, this.bus);
             this.cpuFrame(true);
             // rollback
             this.RAM = RAM;
-            this.VRAM = VRAM;
+            // this.VRAM = VRAM;
             Object.assign(this.bus, bus);
             Object.assign(this.cpu, cpu);
             Object.assign(this.cpu.state, state);

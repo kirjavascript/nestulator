@@ -17,15 +17,6 @@ export function renderBG(nes: NES) {
         return;
     }
 
-    // PPUwrite (0x2007 :
-    //
-    // 0x8b = render mode
-
-            // if (!this.backgroundDirty && ((addr >= 0x2000 && addr < 0x2fc0) || (addr === 0x3f0e && this.nes.RAM[0x56] === 4))) {
-            //     // 0x3f0c captures the tetris flashing while you have completed 4 lines
-            //     this.backgroundDirty = true;
-            // }
-
     if (nes.bus.backgroundDirty) {
         nes.ntUpdates = allTiles;
         nes.bus.backgroundDirty = false;

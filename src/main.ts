@@ -31,9 +31,17 @@ import buildUI from './ui';
 // stage.addChild(debug);
 //
 // renderer.render(stage);
+    // 0x8b = render mode
 
+            // if (!this.backgroundDirty && ((addr >= 0x2000 && addr < 0x2fc0) || (addr === 0x3f0e && this.nes.RAM[0x56] === 4))) {
+            //     // 0x3f0c captures the tetris flashing while you have completed 4 lines
+            //     this.backgroundDirty = true;
+            // }
+
+// TODO: runahead bugs - store ntUpdates and revert
+// TODO: OAM diffing for not updating
+// TODO: tetris flash
 // TODO: fix eric's/erens issue
-// TODO: NY updates
 // TODO: tetrus flash with another layer
 // TODO: detect rocket screen, swap layers
 // TODO: video recording
