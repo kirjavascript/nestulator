@@ -42,6 +42,13 @@ export default function buildUI(nes: NES) {
     });
     nes.runahead = runaheadBox.checked;
 
+    // sfx
+    const sfxBox = document.querySelector('#sfx') as HTMLInputElement;
+    sfxBox.addEventListener('click', e => {
+        nes.sfxEnabled = (e.target as HTMLInputElement).checked;
+    });
+    nes.sfxEnabled = sfxBox.checked;
+
     // input mapping
 
     const controlText = document.querySelector('#controls') as HTMLParagraphElement;

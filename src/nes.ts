@@ -26,6 +26,7 @@ export default class NES {
     framerate!: number;
     baseCycles!: number;
     running!: boolean;
+    sfxEnabled: boolean = false;
     runahead: boolean = true;
 
     public constructor(ROM: Uint8Array = new Uint8Array()) {
@@ -149,7 +150,7 @@ export default class NES {
         }
 
         if (shouldRender) {
-            playSFX(this);
+            this.sfxEnabled && playSFX(this);
             this.gfx.renderBG(this);
         }
 

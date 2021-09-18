@@ -93,8 +93,6 @@ export default class TetrisGfx {
         const { RAM, VRAM } = nes;
         const oam = RAM.slice(0x200, 0x300);
 
-        // TODO OAM_THRESHOLD
-
         // diff oam
         let i = 0
         while (i < OAM_THRESHOLD) {
