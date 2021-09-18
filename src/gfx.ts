@@ -89,21 +89,21 @@ export default class TetrisGfx {
 
     public renderSprites(nes: NES) {
         const { RAM, VRAM } = nes;
-        const oam = Array.from(RAM.slice(0x200, 0x300));
+        const currentOAM = RAM.slice(0x200, 0x300);
 
-        if (nes.lastOAM) {
-            let i = 0
-            while (i < oam.length) {
-                if (oam[i] !== nes.lastOAM[i]) break;
-                i++;
-            }
-            if (i === oam.length) {
-                return;
-            }
+        // diff oam
+        let i = 0
+        while (i < currentOAM.length) {
+            if (currentOAM[i] !== nes.lastOAM[i]) break;
+            i++;
         }
+        if (i === currentOAM.length) {
+            return;
+        }
+        nes.lastOAM = currentOAM;
 
-        nes.lastOAM = Array.from(oam);
-
+        // cone oam to mutate
+        const oam = Array.from(currentOAM);
 
         spCtx.clearRect(0, 0, sprites.width, sprites.height);
 

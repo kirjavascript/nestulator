@@ -21,6 +21,7 @@ export default class NES {
     VRAM: Uint8Array = new Uint8Array(0x4000);
     tiles: Array<Array<number>> = [];
     ntUpdates: Array<number> = [];
+    lastOAM: Uint8Array = new Uint8Array(0x100);
     region: Region = Region.NTSC;
     framerate!: number;
     baseCycles!: number;
