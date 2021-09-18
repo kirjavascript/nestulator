@@ -23,23 +23,20 @@ sprites.style.backgroundColor = 'transparent';
 
 // nt runahead saving
 
-let ntCursor;
-let ntTiles;
+let ntTiles = [];
 
 export default class TetrisGfx {
     storeNTUpdates(nes: NES) {
-        ntCursor = []
-        ntTiles = [];
         for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
             const cursor = xyLookup[nes.ntUpdates[ntIndex]];
-            ntCursor.push(cursor);
-            ntTiles.push(ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8));
+            ntTiles.push([cursor, ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8)]);
         }
     }
     restoreNTUpdates(nes: NES) {
-        for (let ntIndex = 0; ntIndex < ntCursor.length; ntIndex++) {
-            const cursor = ntCursor[ntIndex];
-            const tile = ntTiles[ntIndex];
+        while (ntTiles.length) {
+            const next = ntTiles.shift();
+            const cursor = next[0];
+            const tile = next[1];
             ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);
         }
     }
@@ -53,7 +50,6 @@ export default class TetrisGfx {
         if (nes.bus.backgroundDirty) {
             nes.ntUpdates = allTiles;
             nes.bus.backgroundDirty = false;
-            console.log('dirty');
         }
         if (nes.ntUpdates.length === 0) return;
 

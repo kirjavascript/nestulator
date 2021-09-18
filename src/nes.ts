@@ -82,9 +82,9 @@ export default class NES {
 
     public frame(shouldRender: boolean) {
         if (shouldRender && this.runahead) {
-            this.cpuFrame(false);
+            this.gfx.restoreNTUpdates(this);
+            this.cpuFrame(false, true);
             const RAM = this.RAM.slice(0);
-            this.gfx.storeNTUpdates(this);
             // const VRAM = this.VRAM.slice(0);
             const state = Object.assign({}, this.cpu.state);
             const cpu = Object.assign({}, this.cpu);
@@ -93,18 +93,18 @@ export default class NES {
             // rollback
             this.RAM = RAM;
             // this.VRAM = VRAM;
-            this.gfx.restoreNTUpdates(this);
             Object.assign(this.bus, bus);
             Object.assign(this.cpu, cpu);
             Object.assign(this.cpu.state, state);
             this.bus.backgroundDirty = false;
             this.bus.sfx = 0;
+
         } else {
             this.cpuFrame(shouldRender);
         }
     }
 
-    private cpuFrame(shouldRender: boolean) {
+    private cpuFrame(shouldRender: boolean, runaheadFrame: boolean = false) {
         const totalCycles = this.baseCycles + (this.bus.frames & 1);
 
         this.ntUpdates = [];
@@ -148,6 +148,10 @@ export default class NES {
         // unless we align executionState rollback doesnt work
         while (this.cpu.executionState !== 1) {
             this.cpu.cycle();
+        }
+
+        if (runaheadFrame) {
+            this.gfx.storeNTUpdates(this);
         }
 
         if (shouldRender) {
