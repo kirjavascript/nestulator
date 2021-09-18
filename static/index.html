@@ -70,8 +70,12 @@ button, input, .file {
 a {
     color: #777;
 }
+.frameInfo {
+    margin: 0;
+}
 .frameCount {
-    font-size: 24px;
+    font-size: 16px;
+    font-weight: bold;
 }
 input[type="file"] {
     display: none;
@@ -108,7 +112,7 @@ input[type="checkbox"] {
                     </label>
                     <input id="file" type="file" />
                 </div>
-                <p>
+                <p class="frameInfo">
                     NES frames this frame: <span class="frameCount"></span>
                 </p>
                 <div>
