@@ -76,14 +76,13 @@ export default class NES {
             this.PRG[0x1c89] = 0xfa; // maxout
             this.PRG[0x180c] = 0x90; // fix colours
             // this.PRG[0x1a91] = 0x0; // auto win
-            this.PRG[0x1bec] = 0xa5; // transition
+            // this.PRG[0x1bec] = 0xa5; // transition
         }
     }
 
     public frame(shouldRender: boolean) {
         if (shouldRender && this.runahead) {
-            this.gfx.restoreNTUpdates();
-            this.cpuFrame(false, true);
+            this.cpuFrame(false);
             const RAM = this.RAM.slice(0);
             // const VRAM = this.VRAM.slice(0);
             const state = Object.assign({}, this.cpu.state);
@@ -104,10 +103,8 @@ export default class NES {
         }
     }
 
-    private cpuFrame(shouldRender: boolean, runaheadFrame: boolean = false) {
+    private cpuFrame(shouldRender: boolean) {
         const totalCycles = this.baseCycles + (this.bus.frames & 1);
-
-        this.ntUpdates = [];
 
         this.bus.nmiChecked = false;
         this.bus.vblank = false;
@@ -148,10 +145,6 @@ export default class NES {
         // unless we align executionState rollback doesnt work
         while (this.cpu.executionState !== 1) {
             this.cpu.cycle();
-        }
-
-        if (runaheadFrame) {
-            this.gfx.storeNTUpdates(this);
         }
 
         if (shouldRender) {

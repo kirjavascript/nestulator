@@ -11,7 +11,10 @@ const ctx = background.getContext('2d') as CanvasRenderingContext2D;
 const buffer = ctx.createImageData(8, 8);
 
 const allTiles = [...Array(960).keys()];
-const xyLookup: Array<[number, number]> = allTiles.map(i => [i % 32, 0 | i / 32]);
+const xyLookup: Array<[number, number]> = allTiles.map((i) => [
+    i % 32,
+    0 | (i / 32),
+]);
 
 // sprites
 
@@ -27,21 +30,6 @@ type ntUpdate = [[number, number], ImageData];
 const ntTiles: Array<ntUpdate> = [];
 
 export default class TetrisGfx {
-    storeNTUpdates(nes: NES) {
-        for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
-            const cursor = xyLookup[nes.ntUpdates[ntIndex]];
-            ntTiles.push([cursor, ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8)]);
-        }
-    }
-    restoreNTUpdates() {
-        while (ntTiles.length) {
-            const next = ntTiles.shift() as ntUpdate;
-            const cursor = next[0];
-            const tile = next[1];
-            ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);
-        }
-    }
-
     public renderBG(nes: NES) {
         if (!nes.bus.backgroundDisplay) {
             ctx.clearRect(0, 0, background.width, background.height);
@@ -49,7 +37,7 @@ export default class TetrisGfx {
         }
 
         if (nes.bus.backgroundDirty) {
-            nes.ntUpdates = allTiles;
+            nes.ntUpdates = Array.from(allTiles);
             nes.bus.backgroundDirty = false;
         }
         if (nes.ntUpdates.length === 0) return;
@@ -63,24 +51,28 @@ export default class TetrisGfx {
 
         background.style.backgroundColor = paletteHex[palettes[0][0]];
 
-        for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
-            const cursor = nes.ntUpdates[ntIndex];
+        // uniq
+        nes.ntUpdates = nes.ntUpdates.filter((d, i, a) => a.indexOf(d) === i)
+
+        while (nes.ntUpdates.length) {
+            const cursor = nes.ntUpdates.shift() as number;
             const x = xyLookup[cursor][0];
             const y = xyLookup[cursor][1];
             const tile = nes.VRAM[0x2000 + cursor];
 
             const attrIndex =
-                Math.floor(x / 4) + (Math.floor(y / 4) * 8) + 0x23c0;
+                Math.floor(x / 4) + Math.floor(y / 4) * 8 + 0x23c0;
             const attr = nes.VRAM[attrIndex];
-            const shift = ((x/2 & 1) * 2) + ((y/2 & 1) * 4);
+            const shift = ((x / 2) & 1) * 2 + ((y / 2) & 1) * 4;
             const paletteLine = (attr >> shift) & 0b11;
             const palette = palettes[paletteLine];
 
-            const pixels = nes.tiles[tile + (nes.bus.chr0 * 0x100)];
+            const pixels = nes.tiles[tile + nes.bus.chr0 * 0x100];
 
             for (let i = 0; i < 64; i++) {
                 const pixel = pixels[i];
-                if (pixel !== 0) { // can ignore transparent pixels
+                if (pixel !== 0) {
+                    // can ignore transparent pixels
                     const color = paletteRGB[palette[pixel]];
                     buffer.data[i * 4 + 0] = color[0];
                     buffer.data[i * 4 + 1] = color[1];
@@ -95,9 +87,8 @@ export default class TetrisGfx {
         }
     }
 
-
     public renderSprites(nes: NES) {
-        const { RAM, VRAM } = nes
+        const { RAM, VRAM } = nes;
         spCtx.clearRect(0, 0, sprites.width, sprites.height);
         const oam = [...RAM.slice(0x200, 0x300)];
         const palettes = [
@@ -110,15 +101,16 @@ export default class TetrisGfx {
         while (oam.length) {
             const [y, tile, attr, x] = oam.splice(0, 4);
             // assume attributes like this are bad
-            if (tile !== 0xFF && tile !== 0xEF && x !== 0 && attr !== 0xFF) {
+            if (tile !== 0xff && tile !== 0xef && x !== 0 && attr !== 0xff) {
                 const palette = palettes[attr & 0b11];
                 const vflip = !!(attr & 0b1000000);
 
-                const pixels = nes.tiles[tile + (nes.bus.chr0 * 0x100)];
+                const pixels = nes.tiles[tile + nes.bus.chr0 * 0x100];
 
                 for (let i = 0; i < 64; i++) {
                     const pixel = pixels[vflip ? 63 - i : i];
-                    if (pixel !== 0) { // can ignore transparent pixels
+                    if (pixel !== 0) {
+                        // can ignore transparent pixels
                         const color = paletteRGB[palette[pixel]];
                         buffer.data[i * 4 + 0] = color[0];
                         buffer.data[i * 4 + 1] = color[1];
@@ -135,4 +127,22 @@ export default class TetrisGfx {
             }
         }
     }
+
+    // storeNTUpdates(nes: NES) {
+    //     for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
+    //         const cursor = xyLookup[nes.ntUpdates[ntIndex]];
+    //         ntTiles.push([
+    //             cursor,
+    //             ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8),
+    //         ]);
+    //     }
+    // }
+    // restoreNTUpdates() {
+    //     while (ntTiles.length) {
+    //         const next = ntTiles.shift() as ntUpdate;
+    //         const cursor = next[0];
+    //         const tile = next[1];
+    //         ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);
+    //     }
+    // }
 }
