@@ -24,6 +24,8 @@ sprites.height = 240;
 const spCtx = sprites.getContext('2d') as CanvasRenderingContext2D;
 sprites.style.backgroundColor = 'transparent';
 
+const OAM_THRESHOLD = 0x100;
+
 // nt runahead saving
 
 type ntUpdate = [[number, number], ImageData];
@@ -89,21 +91,20 @@ export default class TetrisGfx {
 
     public renderSprites(nes: NES) {
         const { RAM, VRAM } = nes;
-        const currentOAM = RAM.slice(0x200, 0x300);
+        const oam = RAM.slice(0x200, 0x300);
+
+        // TODO OAM_THRESHOLD
 
         // diff oam
         let i = 0
-        while (i < currentOAM.length) {
-            if (currentOAM[i] !== nes.lastOAM[i]) break;
+        while (i < OAM_THRESHOLD) {
+            if (oam[i] !== nes.lastOAM[i]) break;
             i++;
         }
-        if (i === currentOAM.length) {
+        if (i === OAM_THRESHOLD) {
             return;
         }
-        nes.lastOAM = currentOAM;
-
-        // cone oam to mutate
-        const oam = Array.from(currentOAM);
+        nes.lastOAM = oam;
 
         spCtx.clearRect(0, 0, sprites.width, sprites.height);
 
@@ -114,8 +115,11 @@ export default class TetrisGfx {
             VRAM.slice(0x3f1c, 0x3f20),
         ];
 
-        while (oam.length) {
-            const [y, tile, attr, x] = oam.splice(0, 4);
+        for (let cursor = 0; cursor < OAM_THRESHOLD; cursor += 4) {
+            const y = oam[cursor];
+            const tile = oam[cursor + 1];
+            const attr = oam[cursor + 2];
+            const x = oam[cursor + 3];
             // assume attributes like this are bad
             if (tile !== 0xff && tile !== 0xef && x !== 0 && attr !== 0xff) {
                 const palette = palettes[attr & 0b11];
