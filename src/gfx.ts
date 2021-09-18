@@ -11,7 +11,7 @@ const ctx = background.getContext('2d') as CanvasRenderingContext2D;
 const buffer = ctx.createImageData(8, 8);
 
 const allTiles = [...Array(960).keys()];
-const xyLookup = allTiles.map(i => [i % 32, 0 | i / 32]);
+const xyLookup: Array<[number, number]> = allTiles.map(i => [i % 32, 0 | i / 32]);
 
 // sprites
 
@@ -23,7 +23,8 @@ sprites.style.backgroundColor = 'transparent';
 
 // nt runahead saving
 
-let ntTiles = [];
+type ntUpdate = [[number, number], ImageData];
+const ntTiles: Array<ntUpdate> = [];
 
 export default class TetrisGfx {
     storeNTUpdates(nes: NES) {
@@ -32,9 +33,9 @@ export default class TetrisGfx {
             ntTiles.push([cursor, ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8)]);
         }
     }
-    restoreNTUpdates(nes: NES) {
+    restoreNTUpdates() {
         while (ntTiles.length) {
-            const next = ntTiles.shift();
+            const next = ntTiles.shift() as ntUpdate;
             const cursor = next[0];
             const tile = next[1];
             ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);

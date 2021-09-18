@@ -82,7 +82,7 @@ export default class NES {
 
     public frame(shouldRender: boolean) {
         if (shouldRender && this.runahead) {
-            this.gfx.restoreNTUpdates(this);
+            this.gfx.restoreNTUpdates();
             this.cpuFrame(false, true);
             const RAM = this.RAM.slice(0);
             // const VRAM = this.VRAM.slice(0);
