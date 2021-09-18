@@ -4,9 +4,9 @@
         "build": "esbuild src/main.ts --bundle --minify --outfile=static/bundle.js --loader:.ogg=binary --loader:.nes=binary --loader:.pal=binary"
     },
     "devDependencies": {
-        "6502.ts": "^1.0.4",
         "esbuild": "^0.12.19"
     },
     "dependencies": {
+        "6502.ts": "^1.0.4"
     }
 }

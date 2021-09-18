@@ -89,8 +89,24 @@ export default class TetrisGfx {
 
     public renderSprites(nes: NES) {
         const { RAM, VRAM } = nes;
+        const oam = Array.from(RAM.slice(0x200, 0x300));
+
+        if (nes.lastOAM) {
+            let i = 0
+            while (i < oam.length) {
+                if (oam[i] !== nes.lastOAM[i]) break;
+                i++;
+            }
+            if (i === oam.length) {
+                return;
+            }
+        }
+
+        nes.lastOAM = Array.from(oam);
+
+
         spCtx.clearRect(0, 0, sprites.width, sprites.height);
-        const oam = [...RAM.slice(0x200, 0x300)];
+
         const palettes = [
             VRAM.slice(0x3f10, 0x3f14),
             VRAM.slice(0x3f14, 0x3f18),
@@ -128,21 +144,21 @@ export default class TetrisGfx {
         }
     }
 
-    // storeNTUpdates(nes: NES) {
-    //     for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
-    //         const cursor = xyLookup[nes.ntUpdates[ntIndex]];
-    //         ntTiles.push([
-    //             cursor,
-    //             ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8),
-    //         ]);
-    //     }
-    // }
-    // restoreNTUpdates() {
-    //     while (ntTiles.length) {
-    //         const next = ntTiles.shift() as ntUpdate;
-    //         const cursor = next[0];
-    //         const tile = next[1];
-    //         ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);
-    //     }
-    // }
+    storeNTUpdates(nes: NES) {
+        for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
+            const cursor = xyLookup[nes.ntUpdates[ntIndex]];
+            ntTiles.push([
+                cursor,
+                ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8),
+            ]);
+        }
+    }
+    restoreNTUpdates() {
+        while (ntTiles.length) {
+            const next = ntTiles.shift() as ntUpdate;
+            const cursor = next[0];
+            const tile = next[1];
+            ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);
+        }
+    }
 }
