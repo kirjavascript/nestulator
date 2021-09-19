@@ -34,7 +34,7 @@ sprites.height = 240;
 const spCtx = sprites.getContext('2d') as CanvasRenderingContext2D;
 sprites.style.backgroundColor = 'transparent';
 
-const OAM_SIZE = 0x80; // valid is supposed to be 0x100
+const OAM_SIZE = 0x80; // value is supposed to be 0x100
 
 // nt runahead saving
 
