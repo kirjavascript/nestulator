@@ -23,7 +23,7 @@ flash.width = 256;
 flash.height = 240;
 const flashCtx = flash.getContext('2d') as CanvasRenderingContext2D;
 flash.style.backgroundColor = 'transparent';
-flash.style.visibility = 'hidden'
+flash.style.visibility = 'hidden';
 let hasMask = false;
 
 // sprites
@@ -41,6 +41,9 @@ const OAM_SIZE = 0x80; // valid is supposed to be 0x100
 // type ntUpdate = [[number, number], ImageData];
 // const ntTiles: Array<ntUpdate> = [];
 
+const zap = window.location.search === '?zap';
+const noflash = window.location.search === '?noflash';
+
 export default class TetrisGfx {
     public renderBG(nes: NES) {
         if (!nes.bus.backgroundDisplay) {
@@ -48,10 +51,17 @@ export default class TetrisGfx {
             return;
         }
 
-        flash.style.visibility =
-            nes.RAM[0x56] === 4 && nes.bus.frames % 4 == 0
-                ? 'visible'
-                : 'hidden';
+        if (!noflash) {
+            if (zap) {
+                background.style.filter =
+                    nes.RAM[0x56] === 4 ? 'invert(100%) hue-rotate(90deg)' : '';
+            } else {
+                flash.style.visibility =
+                    nes.RAM[0x56] === 4 && nes.bus.frames % 3 == 0
+                        ? 'visible'
+                        : 'hidden';
+            }
+        }
 
         if (nes.bus.backgroundDirty) {
             nes.ntUpdates = Array.from(allTiles);
