@@ -38,6 +38,11 @@ export default class TetrisGfx {
             return;
         }
 
+        // background.style.filter =
+        //     nes.RAM[0x56] === 4 && nes.bus.frames % 4 == 0
+        //         ? 'invert(100%) hue-rotate(90deg)'
+        //         : '';
+
         if (nes.bus.backgroundDirty) {
             nes.ntUpdates = Array.from(allTiles);
             nes.bus.backgroundDirty = false;
@@ -54,7 +59,7 @@ export default class TetrisGfx {
         background.style.backgroundColor = paletteHex[palettes[0][0]];
 
         // uniq
-        nes.ntUpdates = nes.ntUpdates.filter((d, i, a) => a.indexOf(d) === i)
+        nes.ntUpdates = nes.ntUpdates.filter((d, i, a) => a.indexOf(d) === i);
 
         while (nes.ntUpdates.length) {
             const cursor = nes.ntUpdates.shift() as number;
@@ -94,7 +99,7 @@ export default class TetrisGfx {
         const oam = RAM.slice(0x200, 0x300);
 
         // diff oam
-        let i = 0
+        let i = 0;
         while (i < OAM_THRESHOLD) {
             if (oam[i] !== nes.lastOAM[i]) break;
             i++;
