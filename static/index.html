@@ -40,7 +40,7 @@ canvas {
     object-fit: contain;
     height: initial;
 }
-.sprites {
+.sprites, .flash {
     position: absolute;
     top: 0;
     left: 0;
@@ -94,6 +94,7 @@ input[type="checkbox"] {
         <main>
             <div class="screen">
                 <canvas class="background"></canvas>
+                <canvas class="flash"></canvas>
                 <canvas class="sprites"></canvas>
             </div>
             <p id="controls">

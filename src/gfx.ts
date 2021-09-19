@@ -16,6 +16,16 @@ const xyLookup: Array<[number, number]> = allTiles.map((i) => [
     0 | (i / 32),
 ]);
 
+// flash
+
+const flash = document.querySelector('.flash') as HTMLCanvasElement;
+flash.width = 256;
+flash.height = 240;
+const flashCtx = flash.getContext('2d') as CanvasRenderingContext2D;
+flash.style.backgroundColor = 'transparent';
+flash.style.visibility = 'hidden'
+let hasMask = false;
+
 // sprites
 
 const sprites = document.querySelector('.sprites') as HTMLCanvasElement;
@@ -24,12 +34,12 @@ sprites.height = 240;
 const spCtx = sprites.getContext('2d') as CanvasRenderingContext2D;
 sprites.style.backgroundColor = 'transparent';
 
-const OAM_THRESHOLD = 0x100;
+const OAM_SIZE = 0x80; // valid is supposed to be 0x100
 
 // nt runahead saving
 
-type ntUpdate = [[number, number], ImageData];
-const ntTiles: Array<ntUpdate> = [];
+// type ntUpdate = [[number, number], ImageData];
+// const ntTiles: Array<ntUpdate> = [];
 
 export default class TetrisGfx {
     public renderBG(nes: NES) {
@@ -38,10 +48,10 @@ export default class TetrisGfx {
             return;
         }
 
-        // background.style.filter =
-        //     nes.RAM[0x56] === 4 && nes.bus.frames % 4 == 0
-        //         ? 'invert(100%) hue-rotate(90deg)'
-        //         : '';
+        flash.style.visibility =
+            nes.RAM[0x56] === 4 && nes.bus.frames % 4 == 0
+                ? 'visible'
+                : 'hidden';
 
         if (nes.bus.backgroundDirty) {
             nes.ntUpdates = Array.from(allTiles);
@@ -100,11 +110,11 @@ export default class TetrisGfx {
 
         // diff oam
         let i = 0;
-        while (i < OAM_THRESHOLD) {
+        while (i < OAM_SIZE) {
             if (oam[i] !== nes.lastOAM[i]) break;
             i++;
         }
-        if (i === OAM_THRESHOLD) {
+        if (i === OAM_SIZE) {
             return;
         }
         nes.lastOAM = oam;
@@ -118,7 +128,7 @@ export default class TetrisGfx {
             VRAM.slice(0x3f1c, 0x3f20),
         ];
 
-        for (let cursor = 0; cursor < OAM_THRESHOLD; cursor += 4) {
+        for (let cursor = 0; cursor < OAM_SIZE; cursor += 4) {
             const y = oam[cursor];
             const tile = oam[cursor + 1];
             const attr = oam[cursor + 2];
@@ -151,21 +161,51 @@ export default class TetrisGfx {
         }
     }
 
-    storeNTUpdates(nes: NES) {
-        for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
-            const cursor = xyLookup[nes.ntUpdates[ntIndex]];
-            ntTiles.push([
-                cursor,
-                ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8),
-            ]);
+    setupFlashMask(nes: NES) {
+        if (hasMask) return;
+        // TODO: flush in setROM
+        console.log('createMask');
+        const color = paletteRGB[nes.VRAM[0x3f1c + 2]];
+        const buffer = ctx.getImageData(
+            0,
+            0,
+            background.width,
+            background.height,
+        );
+        const flashColor = paletteRGB[0x30];
+        for (let cursor = 0; cursor < buffer.data.length; cursor += 4) {
+            if (
+                buffer.data[cursor + 0] === color[0] &&
+                buffer.data[cursor + 1] === color[1] &&
+                buffer.data[cursor + 2] === color[2]
+            ) {
+                buffer.data[cursor + 0] = flashColor[0];
+                buffer.data[cursor + 1] = flashColor[1];
+                buffer.data[cursor + 2] = flashColor[2];
+                buffer.data[cursor + 3] = 255;
+            } else {
+                buffer.data[cursor + 3] = 0;
+            }
         }
+        flashCtx.putImageData(buffer, 0, 0);
+        hasMask = true;
     }
-    restoreNTUpdates() {
-        while (ntTiles.length) {
-            const next = ntTiles.shift() as ntUpdate;
-            const cursor = next[0];
-            const tile = next[1];
-            ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);
-        }
-    }
+
+    // storeNTUpdates(nes: NES) {
+    //     for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
+    //         const cursor = xyLookup[nes.ntUpdates[ntIndex]];
+    //         ntTiles.push([
+    //             cursor,
+    //             ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8),
+    //         ]);
+    //     }
+    // }
+    // restoreNTUpdates() {
+    //     while (ntTiles.length) {
+    //         const next = ntTiles.shift() as ntUpdate;
+    //         const cursor = next[0];
+    //         const tile = next[1];
+    //         ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);
+    //     }
+    // }
 }

@@ -72,6 +72,7 @@ export default class TetrisBus implements BusInterface {
                 // outOfDateRenderFlags set to this value on initGameState
                 // and this is where we should update the palette for the piece counts
                 this.backgroundDirty = true;
+                this.nes.gfx.setupFlashMask(this.nes);
             }
             this.nes.RAM[0xA3] = value;
         }
