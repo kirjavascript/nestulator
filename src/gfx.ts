@@ -173,8 +173,6 @@ export default class TetrisGfx {
 
     setupFlashMask(nes: NES) {
         if (hasMask) return;
-        // TODO: flush in setROM
-        console.log('createMask');
         const color = paletteRGB[nes.VRAM[0x3f1c + 2]];
         const buffer = ctx.getImageData(
             0,
@@ -199,6 +197,10 @@ export default class TetrisGfx {
         }
         flashCtx.putImageData(buffer, 0, 0);
         hasMask = true;
+    }
+
+    removeFlashMask() {
+        hasMask = false;
     }
 
     // storeNTUpdates(nes: NES) {

@@ -6,8 +6,6 @@ window.nes = nes;
 
 buildUI(nes);
 
-// nes.framerate = 0.030;
-
 const frameCount = document.querySelector('.frameCount') as HTMLSpanElement;
 const epoch = performance.now();
 let framesDone = 0;

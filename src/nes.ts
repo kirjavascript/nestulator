@@ -41,6 +41,7 @@ export default class NES {
         this.CHR = ROM.slice(0x8010); // 2bpp, 16 per tile
         this.running = !!ROM.length;
         this.cpu.reset();
+        this.gfx.removeFlashMask();
 
         this.tiles.splice(0, this.tiles.length);
 
