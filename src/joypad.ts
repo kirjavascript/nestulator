@@ -131,17 +131,6 @@ export function remap({
         // poll for gamepad presses
         for (let i = 0; i < gamepads.length; i++) {
             const gamepad = gamepads[i];
-            const pressed = gamepad.buttons.findIndex((d) => d.pressed);
-            if (pressed !== -1) {
-                const alreadyPressed = Object.values(padRemaps)
-                    .filter((d) => d.length === 2)
-                    .some(([_, alreadyPressed]) => alreadyPressed === pressed);
-                if (!alreadyPressed) {
-                    padRemaps[pinLookup[mapIndex]] = [i, pressed];
-                    addedMap();
-                    break;
-                }
-            }
             const axes = gamepad.axes.findIndex((d) => Math.abs(d) > 0.51);
             if (axes !== -1) {
                 const direction = Math.round(gamepad.axes[axes]);
@@ -156,6 +145,18 @@ export function remap({
                     padRemaps[pinLookup[mapIndex]] = [i, axes, direction];
                     addedMap();
                     break;
+                }
+            } else {
+                const pressed = gamepad.buttons.findIndex((d) => d.pressed);
+                if (pressed !== -1) {
+                    const alreadyPressed = Object.values(padRemaps)
+                        .filter((d) => d.length === 2)
+                        .some(([_, alreadyPressed]) => alreadyPressed === pressed);
+                    if (!alreadyPressed) {
+                        padRemaps[pinLookup[mapIndex]] = [i, pressed];
+                        addedMap();
+                        break;
+                    }
                 }
             }
         }
