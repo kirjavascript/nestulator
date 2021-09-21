@@ -2,7 +2,7 @@ import NES from './nes';
 import buildUI from './ui';
 
 const nes = new NES();
-window.nes = nes;
+Object.assign(window, { nes });
 
 buildUI(nes);
 
