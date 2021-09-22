@@ -75,6 +75,7 @@ export default class TetrisBus implements BusInterface {
                 this.nes.gfx.setupFlashMask(this.nes);
             }
             this.nes.RAM[0xA3] = value;
+            return;
         }
         if (address === 0x6F1 && value !== 0) {
             // sound effect slot 1 init

@@ -1,5 +1,6 @@
 import NES from './nes';
 import { paletteHex, paletteRGB } from './colors';
+import { zap, noflash } from './search-params';
 
 // background
 
@@ -40,9 +41,6 @@ const OAM_SIZE = 0x80; // value is supposed to be 0x100
 
 // type ntUpdate = [[number, number], ImageData];
 // const ntTiles: Array<ntUpdate> = [];
-
-const zap = window.location.search === '?zap';
-const noflash = window.location.search === '?noflash';
 
 export default class TetrisGfx {
     public renderBG(nes: NES) {
@@ -202,22 +200,4 @@ export default class TetrisGfx {
     removeFlashMask() {
         hasMask = false;
     }
-
-    // storeNTUpdates(nes: NES) {
-    //     for (let ntIndex = 0; ntIndex < nes.ntUpdates.length; ntIndex++) {
-    //         const cursor = xyLookup[nes.ntUpdates[ntIndex]];
-    //         ntTiles.push([
-    //             cursor,
-    //             ctx.getImageData(cursor[0] * 8, cursor[1] * 8, 8, 8),
-    //         ]);
-    //     }
-    // }
-    // restoreNTUpdates() {
-    //     while (ntTiles.length) {
-    //         const next = ntTiles.shift() as ntUpdate;
-    //         const cursor = next[0];
-    //         const tile = next[1];
-    //         ctx.putImageData(tile, cursor[0] * 8, cursor[1] * 8);
-    //     }
-    // }
 }
