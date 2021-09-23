@@ -73,10 +73,18 @@ export default class TetrisBus implements BusInterface {
                 // and this is where we should update the palette for the piece counts
                 this.backgroundDirty = true;
                 this.nes.gfx.setupFlashMask(this.nes);
+
+                // patch first piece
+                // this.nes.RAM[0x42] = 0;
+                // this.nes.RAM[0x62] = 0;
             }
             this.nes.RAM[0xA3] = value;
             return;
         }
+        // if (address === 0xBF) {
+            // this.nes.RAM[0xBF] = Math.random()*14|0;
+            // return;
+        // }
         if (address === 0x6F1 && value !== 0) {
             // sound effect slot 1 init
             this.sfx = value;
@@ -89,7 +97,6 @@ export default class TetrisBus implements BusInterface {
         if (address === 0x2000) {
             // PPUCTRL
             if (value === 0x90) {
-                // backgroundTile = Boolean(value & 0b10000)
                 this.nmiEnabled = !!(value & 0b10000000);
             }
             return;
