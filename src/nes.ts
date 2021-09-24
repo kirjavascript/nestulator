@@ -23,6 +23,7 @@ export default class NES {
     ntUpdates: Array<number> = [];
     lastOAM: Uint8Array = new Uint8Array(0x100);
     region: Region = Region.NTSC;
+    spawnTableIndex!: number;
     framerate!: number;
     baseCycles!: number;
     running!: boolean;
@@ -73,6 +74,11 @@ export default class NES {
         this.framerate = this.region === Region.PAL ? 0.0500069 : 0.0600988;
         // this value doesnt really matter as we skip a lot of cycles
         this.baseCycles = this.region === Region.PAL ? 33247 : 29780;
+
+        const spawnTable = [0x02, 0x07, 0x08, 0x0A, 0x0B, 0x0E, 0x12];
+        this.spawnTableIndex = this.PRG.findIndex((_, i, a) => {
+            return a.slice(i, i + 7).every((d, i) => d === spawnTable[i]);
+        });
 
         // patches
         if (this.region !== Region.GYM) {
