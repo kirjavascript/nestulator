@@ -9,8 +9,11 @@ export default class SpawnTable {
     offset: number;
     patching: boolean = false;
     pieces: Array<number> = [];
-    patchIndex: number = 0;
-    pieceIndex: number = 0;
+    spawnInit: number = 1;
+
+    private spawnCount(): number {
+        return this.nes.RAM[0x1A];
+    }
 
     public constructor(nes: NES) {
         this.nes = nes;
@@ -28,16 +31,10 @@ export default class SpawnTable {
     }
 
     public next(): number {
-        const piece = this.pieces[this.pieceIndex];
-        this.patchIndex = (this.patchIndex + 1) % 4;
-        if (this.patchIndex === 3) {
-            this.pieceIndex = (this.pieceIndex + 1) % this.pieces.length;
-        }
-        return piece;
+        return this.pieces[(this.spawnCount() - this.spawnInit) % this.pieces.length];
     }
 
     public reset() {
-        this.pieceIndex = 0;
-        this.patchIndex = 0;
+        this.spawnInit = this.spawnCount() - 1;
     }
 }
