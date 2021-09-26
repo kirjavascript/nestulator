@@ -28,6 +28,14 @@ export default class TetrisBus implements BusInterface {
         if (address === 0xfffe) return 0x4a; // irq
         if (address === 0xffff) return 0x80;
 
+        if (
+            this.nes.spawnTable.patching &&
+            address >= this.nes.spawnTable.offset &&
+            address < this.nes.spawnTable.offset + 7
+        ) {
+            return this.nes.spawnTable.next();
+        }
+
         if (address === 0x33) {
             // perf hack: if the rom is waiting for NMI, just skip to it
             this.nmiChecked = true;
@@ -67,17 +75,17 @@ export default class TetrisBus implements BusInterface {
         return 0;
     }
     write(address: number, value: number): void {
-        if (address === 0xA3) {
+        if (address === 0xa3) {
             if (value === 0x47) {
                 // outOfDateRenderFlags set to this value on initGameState
                 // and this is where we should update the palette for the piece counts
                 this.backgroundDirty = true;
-                this.nes.gfx.setupFlashMask(this.nes);
+                this.nes.initGameState();
             }
-            this.nes.RAM[0xA3] = value;
+            this.nes.RAM[0xa3] = value;
             return;
         }
-        if (address === 0x6F1 && value !== 0) {
+        if (address === 0x6f1 && value !== 0) {
             // sound effect slot 1 init
             this.sfx = value;
             return;
@@ -124,7 +132,7 @@ export default class TetrisBus implements BusInterface {
             // PPUDATA
             const addr = this.ppuAddr & 0x3fff;
             this.nes.VRAM[addr] = value;
-            if (addr >= 0x2000 && addr < 0x23C0) {
+            if (addr >= 0x2000 && addr < 0x23c0) {
                 this.nes.ntUpdates.push(addr - 0x2000);
             }
             this.ppuAddr++;

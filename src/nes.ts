@@ -1,6 +1,7 @@
 import StateMachineCpu from '6502.ts/lib/machine/cpu/StateMachineCpu';
 import TetrisBus from './bus';
 import TetrisGfx from './gfx';
+import SpawnTable from './spawn-table';
 import { playSFX } from './audio';
 
 const nmiCycles = 2273;
@@ -23,7 +24,7 @@ export default class NES {
     ntUpdates: Array<number> = [];
     lastOAM: Uint8Array = new Uint8Array(0x100);
     region: Region = Region.NTSC;
-    spawnTableIndex!: number;
+    spawnTable!: SpawnTable;
     framerate!: number;
     baseCycles!: number;
     running!: boolean;
@@ -60,6 +61,8 @@ export default class NES {
             this.tiles.push(pixels);
         }
 
+        this.spawnTable = new SpawnTable(this);
+
         // region stuff
 
         const dropTable = this.PRG[0x98e];
@@ -75,11 +78,6 @@ export default class NES {
         // this value doesnt really matter as we skip a lot of cycles
         this.baseCycles = this.region === Region.PAL ? 33247 : 29780;
 
-        const spawnTable = [0x02, 0x07, 0x08, 0x0A, 0x0B, 0x0E, 0x12];
-        this.spawnTableIndex = this.PRG.findIndex((_, i, a) => {
-            return a.slice(i, i + 7).every((d, i) => d === spawnTable[i]);
-        });
-
         // patches
         if (this.region !== Region.GYM) {
             this.PRG[0x1c89] = 0xfa; // maxout
@@ -87,6 +85,12 @@ export default class NES {
             // this.PRG[0x1a91] = 0x0; // auto win
             // this.PRG[0x1bec] = 0xa5; // transition
         }
+    }
+
+    public initGameState() {
+        // happens twice in quick succession when a game is started
+        this.gfx.setupFlashMask(this);
+        this.spawnTable.reset();
     }
 
     public frame(shouldRender: boolean) {
