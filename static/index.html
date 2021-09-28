@@ -2,93 +2,10 @@
 <html>
     <head>
         <meta charset="UTF-8" />
-        <meta name="theme-color" content="#000000">
+        <meta name="theme-color" content="#111111">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui">
         <title>nestulator</title>
-<style>
-html, body {
-    height: 100%;
-    margin: 0;
-    background-color: #111;
-    color: #777;
-}
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: monospace;
-}
-main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-}
-.screen {
-    position: relative;
-    height: 512px;
-}
-canvas {
-    height: 512px;
-    box-shadow: 2px 2px 5px black;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-}
-.screen:fullscreen canvas {
-    width: 100vw;
-    max-height: 100vh;
-    object-fit: contain;
-    height: initial;
-}
-.sprites, .flash {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-.options {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    align-items: flex-end;
-}
-@media (max-width: 512px) {
-    .options {
-        flex-direction: column;
-        align-items: center;
-    }
-}
-button, input, .file {
-    background-color: #111;
-    color: #777;
-    font-family: monospace;
-    font-size: 11px;
-    font-weight: bold;
-    border: 2px solid #777;
-    border-radius: 2px;
-    padding: 1px 4px;
-}
-a {
-    color: #777;
-}
-.frameInfo {
-    margin: 0;
-}
-.frameCount {
-    font-size: 16px;
-    font-weight: bold;
-}
-input[type="file"] {
-    display: none;
-}
-input[type="checkbox"] {
-    accent-color: #333;
-}
-.source {
-    position: absolute;
-    right: 5px;
-    bottom: 5px;
-}
-</style>
+        <link rel="stylesheet" href="./styles.css" type="text/css" charset="utf-8">
     </head>
     <body>
         <main>
