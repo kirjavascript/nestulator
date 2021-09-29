@@ -9,7 +9,8 @@ export default class SpawnTable {
     offset: number;
     patching: boolean = false;
     pieces: Array<number> = [];
-    spawnInit: number = 1;
+    lastCount: number = 1;
+    index: number = 0;
 
     private spawnCount(): number {
         return this.nes.RAM[0x1A];
@@ -31,10 +32,15 @@ export default class SpawnTable {
     }
 
     public next(): number {
-        return this.pieces[(this.spawnCount() - this.spawnInit) % this.pieces.length];
+        const spawnCount = this.spawnCount();
+        if (spawnCount !== this.lastCount) {
+            this.index++;
+            this.lastCount = spawnCount;
+        }
+        return this.pieces[this.index % this.pieces.length];
     }
 
     public reset() {
-        this.spawnInit = this.spawnCount() - 1;
+        // TODO: reset index before / after game
     }
 }
