@@ -73,15 +73,13 @@ export default class TetrisBus implements BusInterface {
         return 0;
     }
     write(address: number, value: number): void {
-        if (address === ADDR.outOfDateRenderFlags) {
-            if (value === 0x47) {
-                // set to this value on initGameState
-                // and this is where we should update the palette for the piece counts
-                this.backgroundDirty = true;
-                this.nes.initGameState();
-            }
-            this.nes.RAM[ADDR.outOfDateRenderFlags] = value;
-            return;
+        if (address === ADDR.renderMode) {
+            this.nes.setRenderMode(value);
+        }
+        if (address === ADDR.outOfDateRenderFlags && value === 0x47) {
+            this.nes.initGameState();
+            // we need to update the palette for the piece counts
+            this.backgroundDirty = true;
         }
         if (address === ADDR.soundEffectSlot1Init && value !== 0) {
             this.sfx = value;

@@ -10,8 +10,8 @@ export default class SpawnTable {
     offset: number;
     patching: boolean = false;
     pieces: Array<number> = [];
-    lastCount: number = 1;
-    index: number = 0;
+    lastCount!: number;
+    index!: number;
 
     public constructor(nes: NES) {
         this.nes = nes;
@@ -26,6 +26,7 @@ export default class SpawnTable {
             (piece) => spawnTable[tableLookup.indexOf(piece)] || 0x2,
         );
         this.patching = this.pieces.length > 0;
+        this.reset();
     }
 
     public next(): number {
@@ -34,6 +35,13 @@ export default class SpawnTable {
             this.index++;
             this.lastCount = spawnCount;
         }
-        return this.pieces[this.index % this.pieces.length];
+
+        const offset = (this.index + this.pieces.length - 3) % this.pieces.length
+        return this.pieces[offset];
+    }
+
+    public reset() {
+        this.index = 0;
+        this.lastCount = this.nes.RAM[ADDR.spawnCount];
     }
 }

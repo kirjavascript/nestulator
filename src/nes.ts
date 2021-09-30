@@ -93,6 +93,15 @@ export default class NES {
         this.gfx.setupFlashMask(this);
     }
 
+    public setRenderMode(mode: number) {
+        // happens twice each change
+        if ((mode & 0xE) === 0) {
+            // set on 'menu' screens
+            // cannot use the level select screen index alone because of tetrisgym
+            this.spawnTable.reset();
+        }
+    }
+
     public frame(shouldRender: boolean) {
         if (shouldRender && this.runahead) {
             this.cpuFrame(false);
