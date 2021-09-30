@@ -1,6 +1,7 @@
 import BusInterface from '6502.ts/lib/machine/bus/BusInterface';
 import buttonIsDown from './joypad';
 import NES from './nes';
+import * as ADDR from './ram-addr';
 
 export default class TetrisBus implements BusInterface {
     nes: NES;
@@ -36,10 +37,10 @@ export default class TetrisBus implements BusInterface {
             return this.nes.spawnTable.next();
         }
 
-        if (address === 0x33) {
+        if (address === ADDR.verticalBlankingInterval) {
             // perf hack: if the rom is waiting for NMI, just skip to it
             this.nmiChecked = true;
-            return this.nes.RAM[0x33];
+            return this.nes.RAM[ADDR.verticalBlankingInterval];
         }
 
         if (address < 0x2000) {
@@ -47,8 +48,7 @@ export default class TetrisBus implements BusInterface {
             return this.nes.RAM[address & 0x7ff];
         }
 
-        if (address === 0x2002) {
-            // PPUSTATUS
+        if (address === ADDR.PPUSTATUS) {
             return this.vblank ? 0x40 : 0;
         }
 
@@ -57,13 +57,11 @@ export default class TetrisBus implements BusInterface {
             return 0;
         }
 
-        if (address === 0x4016) {
+        if (address === ADDR.JOY1) {
             const isDown = buttonIsDown(this.joyIndex);
             this.joyIndex = (this.joyIndex + 1) % 8;
             return +isDown;
         }
-
-        if (address === 0x4017) return 0; // joypad2
 
         if (address >= 0x8000) {
             // ROM
@@ -75,18 +73,17 @@ export default class TetrisBus implements BusInterface {
         return 0;
     }
     write(address: number, value: number): void {
-        if (address === 0xa3) {
+        if (address === ADDR.outOfDateRenderFlags) {
             if (value === 0x47) {
-                // outOfDateRenderFlags set to this value on initGameState
+                // set to this value on initGameState
                 // and this is where we should update the palette for the piece counts
                 this.backgroundDirty = true;
                 this.nes.initGameState();
             }
-            this.nes.RAM[0xa3] = value;
+            this.nes.RAM[ADDR.outOfDateRenderFlags] = value;
             return;
         }
-        if (address === 0x6f1 && value !== 0) {
-            // sound effect slot 1 init
+        if (address === ADDR.soundEffectSlot1Init && value !== 0) {
             this.sfx = value;
             return;
         }
@@ -94,15 +91,13 @@ export default class TetrisBus implements BusInterface {
             this.nes.RAM[address & 0x7ff] = value;
             return;
         }
-        if (address === 0x2000) {
-            // PPUCTRL
+        if (address === ADDR.PPUCTRL) {
             if (value === 0x90) {
                 this.nmiEnabled = !!(value & 0b10000000);
             }
             return;
         }
-        if (address === 0x2001) {
-            // PPUMASK
+        if (address === ADDR.PPUMASK) {
             const showBackground = !!(value & 0b1000);
             if (showBackground !== this.backgroundDisplay) {
                 this.backgroundDirty = true;
@@ -110,16 +105,13 @@ export default class TetrisBus implements BusInterface {
             this.backgroundDisplay = showBackground;
             return;
         }
-        if (address === 0x2003) {
-            // OAMADDR
+        if (address === ADDR.OAMADDR) {
             return;
         }
-        if (address === 0x2005) {
-            // PPUSCROLL, ignore
+        if (address === ADDR.PPUSCROLL) {
             return;
         }
-        if (address === 0x2006) {
-            // PPUADDR
+        if (address === ADDR.PPUADDR) {
             if (this.ppuAddrIndex === 0) {
                 this.ppuAddr = value;
             } else {
@@ -128,8 +120,7 @@ export default class TetrisBus implements BusInterface {
             this.ppuAddrIndex ^= 1;
             return;
         }
-        if (address === 0x2007) {
-            // PPUDATA
+        if (address === ADDR.PPUDATA) {
             const addr = this.ppuAddr & 0x3fff;
             this.nes.VRAM[addr] = value;
             if (addr >= 0x2000 && addr < 0x23c0) {
@@ -138,15 +129,14 @@ export default class TetrisBus implements BusInterface {
             this.ppuAddr++;
             return;
         }
-        if (address === 0x4016) {
-            // joypad
+        if (address === ADDR.JOY1) {
             return;
         }
         if ((address >= 0x4000 && address <= 0x4015) || address === 0x4017) {
             // APU
             return;
         }
-        if (address >= 0x8000 && address <= 0x9fff) {
+        if (address >= ADDR.MMC1_Control && address <= 0x9fff) {
             // MMC1 Control
             return;
         }

@@ -1,5 +1,6 @@
 import NES from './nes';
 import { pieces } from './search-params';
+import * as ADDR from './ram-addr';
 
 const spawnTable = [0x02, 0x07, 0x08, 0x0a, 0x0b, 0x0e, 0x12];
 const tableLookup = 'TJZOSLI';
@@ -11,10 +12,6 @@ export default class SpawnTable {
     pieces: Array<number> = [];
     lastCount: number = 1;
     index: number = 0;
-
-    private spawnCount(): number {
-        return this.nes.RAM[0x1A];
-    }
 
     public constructor(nes: NES) {
         this.nes = nes;
@@ -32,7 +29,7 @@ export default class SpawnTable {
     }
 
     public next(): number {
-        const spawnCount = this.spawnCount();
+        const spawnCount = this.nes.RAM[ADDR.spawnCount];
         if (spawnCount !== this.lastCount) {
             this.index++;
             this.lastCount = spawnCount;

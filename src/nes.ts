@@ -3,6 +3,7 @@ import TetrisBus from './bus';
 import TetrisGfx from './gfx';
 import SpawnTable from './spawn-table';
 import { playSFX } from './audio';
+import * as ADDR from './ram-addr';
 
 const nmiCycles = 2273;
 
@@ -139,13 +140,13 @@ export default class NES {
             // skipping nmi on a frame where this happens fixes it
             // (this can definitely be improved)
 
-            if (this.RAM[0xc0] !== 3 || this.bus.frames % 60 !== 0) {
+            if (this.RAM[ADDR.gameMode] !== 3 || this.bus.frames % 60 !== 0) {
                 this.cpu.nmi();
             }
         }
 
         const afterCycles =
-            this.RAM[0xc0] === 3
+            this.RAM[ADDR.gameMode] === 3
                 ? 1300 // workaround for level select screen bug
                 : nmiCycles;
 

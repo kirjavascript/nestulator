@@ -1,6 +1,7 @@
 import NES from './nes';
 import { paletteHex, paletteRGB } from './colors';
 import { zap, noflash } from './search-params';
+import * as ADDR from './ram-addr';
 
 // background
 
@@ -52,10 +53,10 @@ export default class TetrisGfx {
         if (!noflash) {
             if (zap) {
                 background.style.filter =
-                    nes.RAM[0x56] === 4 ? 'invert(100%) hue-rotate(90deg)' : '';
+                    nes.RAM[ADDR.completedLines] === 4 ? 'invert(100%) hue-rotate(90deg)' : '';
             } else {
                 flash.style.visibility =
-                    nes.RAM[0x56] === 4 && nes.bus.frames % 3 == 0
+                    nes.RAM[ADDR.completedLines] === 4 && nes.bus.frames % 3 == 0
                         ? 'visible'
                         : 'hidden';
             }
