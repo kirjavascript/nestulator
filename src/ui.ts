@@ -1,5 +1,6 @@
 import NES from './nes';
-import { remap } from './joypad';
+import { remap, gamepads } from './joypad';
+import { hasDebug } from './search-params';
 
 export default function buildUI(nes: NES) {
     // load ROM from storage
@@ -11,8 +12,9 @@ export default function buildUI(nes: NES) {
 
     // change ROM
 
-    (document.querySelector('#file') as HTMLInputElement)
-        .addEventListener('change', (e: any) => {
+    (document.querySelector('#file') as HTMLInputElement).addEventListener(
+        'change',
+        (e: any) => {
             const reader = new FileReader();
             reader.readAsArrayBuffer(e.target.files[0]);
             reader.onloadend = () => {
@@ -22,38 +24,43 @@ export default function buildUI(nes: NES) {
                 window.localStorage.setItem('ROM', JSON.stringify([...rom]));
             };
             e.preventDefault();
-        });
+        },
+    );
 
     // fullscreen
 
-    const screen = document.querySelector('.screen') as HTMLDivElement
+    const screen = document.querySelector('.screen') as HTMLDivElement;
     function fullscreen() {
         screen.requestFullscreen().catch(console.error);
     }
-    (document.querySelector('#fullscreen') as HTMLButtonElement)
-        .addEventListener('click', fullscreen);
+    (
+        document.querySelector('#fullscreen') as HTMLButtonElement
+    ).addEventListener('click', fullscreen);
     screen.addEventListener('dblclick', fullscreen);
 
     // runahead
 
     const runaheadBox = document.querySelector('#runahead') as HTMLInputElement;
-    runaheadBox.addEventListener('click', e => {
+    runaheadBox.addEventListener('click', (e) => {
         nes.runahead = (e.target as HTMLInputElement).checked;
     });
     nes.runahead = runaheadBox.checked;
 
     // sfx
     const sfxBox = document.querySelector('#sfx') as HTMLInputElement;
-    sfxBox.addEventListener('click', e => {
+    sfxBox.addEventListener('click', (e) => {
         nes.sfxEnabled = (e.target as HTMLInputElement).checked;
     });
     nes.sfxEnabled = sfxBox.checked;
 
     // input mapping
 
-    const controlText = document.querySelector('#controls') as HTMLParagraphElement;
-    (document.querySelector('#input') as HTMLButtonElement)
-        .addEventListener('click', () => {
+    const controlText = document.querySelector(
+        '#controls',
+    ) as HTMLParagraphElement;
+    (document.querySelector('#input') as HTMLButtonElement).addEventListener(
+        'click',
+        () => {
             nes.running = false;
             remap({
                 setText: (text) => {
@@ -64,16 +71,19 @@ export default function buildUI(nes: NES) {
                     nes.running = true;
                 },
             });
-        });
+        },
+    );
 
-    window.debug = () => {
-        const debug = (document.querySelector('main') as HTMLElement)
-            .appendChild(document.createElement('pre'));
+    if (hasDebug) {
+        const debug = (
+            document.querySelector('main') as HTMLElement
+        ).appendChild(document.createElement('pre'));
 
         debug.style.position = 'absolute';
         debug.style.top = '0';
         debug.style.left = '0';
         debug.style.color = 'limegreen';
+        debug.style.pointerEvents = 'none';
 
         function ram() {
             const lines = [];
@@ -82,14 +92,24 @@ export default function buildUI(nes: NES) {
                 lines.push(
                     `0x${cursor.toString(16).padStart(4, '0')}: ` +
                         d
-                    .splice(0, 16)
-                    .map((d) => d.toString(16).padStart(2, '0'))
-                    .join(','),
+                            .splice(0, 16)
+                            .map((d) => d.toString(16).padStart(2, '0'))
+                            .join(','),
                 );
             }
-            debug.innerHTML = `PC: ${nes.cpu.state.p.toString(16)}\nframes: ${
-                nes.bus.frames
-            }\n${JSON.stringify(nes.cpu.state)}\n${lines.join('\n')}`;
+            debug.innerHTML = `
+frames: ${nes.bus.frames} PC: ${nes.cpu.state.p.toString(16)}
+${JSON.stringify(nes.cpu.state)}
+${JSON.stringify(
+    gamepads.map((gp) => [
+        gp.buttons.map((b) => `PR: ${b.pressed} V: ${b.value} T ${b.touched}`),
+        gp.axes,
+    ]),
+    null,
+    4,
+)}
+${lines.join('\n')}
+            `.trim();
         }
 
         const loop = () => {
@@ -97,6 +117,5 @@ export default function buildUI(nes: NES) {
             ram();
         };
         loop();
-        delete window.debug;
-    };
+    }
 }

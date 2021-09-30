@@ -1,5 +1,5 @@
 import BusInterface from '6502.ts/lib/machine/bus/BusInterface';
-import buttonIsDown from './joypad';
+import { buttonIsDown } from './joypad';
 import NES from './nes';
 import * as ADDR from './ram-addr';
 

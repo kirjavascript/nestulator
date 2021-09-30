@@ -36,7 +36,7 @@ export default class SpawnTable {
             this.lastCount = spawnCount;
         }
 
-        const offset = (this.index + this.pieces.length - 3) % this.pieces.length
+        const offset = (this.index - 3) % this.pieces.length
         return this.pieces[offset];
     }
 

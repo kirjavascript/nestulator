@@ -55,7 +55,7 @@ html.addEventListener('keyup', (e) => {
 
 // gamepad
 
-const gamepads: Array<Gamepad> = [];
+export const gamepads: Array<Gamepad> = [];
 
 // @ts-ignore
 window.addEventListener(
@@ -76,7 +76,7 @@ window.addEventListener(
     false,
 );
 
-export default function buttonIsDown(index: number) {
+export function buttonIsDown(index: number) {
     if (padmap && index in padmap) {
         const mapping = padmap[index];
         if (mapping.length === 2) {
@@ -131,29 +131,29 @@ export function remap({
         // poll for gamepad presses
         for (let i = 0; i < gamepads.length; i++) {
             const gamepad = gamepads[i];
-            const axes = gamepad.axes.findIndex((d) => Math.abs(d) > 0.51);
-            if (axes !== -1) {
-                const direction = Math.round(gamepad.axes[axes]);
-                const alreadyTilted = Object.values(padRemaps)
-                    .filter((d) => d.length === 3)
-                    .some(
-                        ([_, alreadyTilted, alreadyDir]) =>
-                            alreadyTilted === axes && alreadyDir === direction,
-                    );
-
-                if (!alreadyTilted) {
-                    padRemaps[pinLookup[mapIndex]] = [i, axes, direction];
+            const pressed = gamepad.buttons.findIndex((d) => d.pressed);
+            if (pressed !== -1) {
+                const alreadyPressed = Object.values(padRemaps)
+                    .filter((d) => d.length === 2)
+                    .some(([_, alreadyPressed]) => alreadyPressed === pressed);
+                if (!alreadyPressed) {
+                    padRemaps[pinLookup[mapIndex]] = [i, pressed];
                     addedMap();
                     break;
                 }
             } else {
-                const pressed = gamepad.buttons.findIndex((d) => d.pressed);
-                if (pressed !== -1) {
-                    const alreadyPressed = Object.values(padRemaps)
-                        .filter((d) => d.length === 2)
-                        .some(([_, alreadyPressed]) => alreadyPressed === pressed);
-                    if (!alreadyPressed) {
-                        padRemaps[pinLookup[mapIndex]] = [i, pressed];
+                const axes = gamepad.axes.findIndex((d) => Math.abs(d) > 0.51);
+                if (axes !== -1) {
+                    const direction = Math.round(gamepad.axes[axes]);
+                    const alreadyTilted = Object.values(padRemaps)
+                        .filter((d) => d.length === 3)
+                        .some(
+                            ([_, alreadyTilted, alreadyDir]) =>
+                            alreadyTilted === axes && alreadyDir === direction,
+                        );
+
+                    if (!alreadyTilted) {
+                        padRemaps[pinLookup[mapIndex]] = [i, axes, direction];
                         addedMap();
                         break;
                     }
