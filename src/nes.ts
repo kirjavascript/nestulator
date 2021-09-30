@@ -90,7 +90,6 @@ export default class NES {
     public initGameState() {
         // happens twice in quick succession when a game is started
         this.gfx.setupFlashMask(this);
-        this.spawnTable.reset();
     }
 
     public frame(shouldRender: boolean) {

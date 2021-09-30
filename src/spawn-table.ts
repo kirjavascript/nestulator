@@ -39,8 +39,4 @@ export default class SpawnTable {
         }
         return this.pieces[this.index % this.pieces.length];
     }
-
-    public reset() {
-        // TODO: reset index before / after game
-    }
 }
