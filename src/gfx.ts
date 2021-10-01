@@ -38,11 +38,6 @@ sprites.style.backgroundColor = 'transparent';
 
 const OAM_SIZE = 0x80; // value is supposed to be 0x100
 
-// nt runahead saving
-
-// type ntUpdate = [[number, number], ImageData];
-// const ntTiles: Array<ntUpdate> = [];
-
 export default class TetrisGfx {
     public renderBG(nes: NES) {
         if (!nes.bus.backgroundDisplay) {

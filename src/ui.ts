@@ -85,7 +85,7 @@ export default function buildUI(nes: NES) {
         debug.style.color = 'limegreen';
         debug.style.pointerEvents = 'none';
 
-        function ram() {
+        function render() {
             const lines = [];
             const d = [...nes.RAM];
             for (let cursor = 0; d.length; cursor += 16) {
@@ -102,7 +102,7 @@ frames: ${nes.bus.frames} PC: ${nes.cpu.state.p.toString(16)}
 ${JSON.stringify(nes.cpu.state)}
 ${JSON.stringify(
     gamepads.map((gp) => [
-        gp.buttons.map((b) => `PR: ${b.pressed} V: ${b.value} T ${b.touched}`),
+        gp.buttons.map((b) => `P: ${b.pressed} V: ${b.value} T ${b.touched}`),
         gp.axes,
     ]),
     null,
@@ -114,7 +114,7 @@ ${lines.join('\n')}
 
         const loop = () => {
             requestAnimationFrame(loop);
-            ram();
+            render();
         };
         loop();
     }
