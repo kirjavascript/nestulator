@@ -88,6 +88,16 @@ export default class NES {
         }
     }
 
+    // user API
+
+    public changeLevel(level: number) {
+        this.RAM[ADDR.outOfDateRenderFlags] = 0b10;
+        this.RAM[ADDR.player1_levelNumber] = level;
+        this.RAM[ADDR.levelNumber] = level;
+    }
+
+    // event hooks
+
     public initGameState() {
         // happens twice in quick succession when a game is started
         this.gfx.setupFlashMask(this);
@@ -101,6 +111,8 @@ export default class NES {
             this.spawnTable.reset();
         }
     }
+
+    // rendering
 
     public frame(shouldRender: boolean) {
         if (shouldRender && this.runahead) {
