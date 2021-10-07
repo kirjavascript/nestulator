@@ -1,11 +1,13 @@
 import NES from './nes';
 import { paletteHex, paletteRGB } from './colors';
-import { zap, noflash } from './search-params';
+import { zap, noflash, firstPerson } from './search-params';
 import * as ADDR from './ram-addr';
+
+const screen = document.querySelector('.screen') as HTMLDivElement;
 
 // background
 
-const background = document.querySelector('.background') as HTMLCanvasElement;
+const background = screen.querySelector('.background') as HTMLCanvasElement;
 background.width = 256;
 background.height = 240;
 const ctx = background.getContext('2d') as CanvasRenderingContext2D;
@@ -20,7 +22,7 @@ const xyLookup: Array<[number, number]> = allTiles.map((i) => [
 
 // flash
 
-const flash = document.querySelector('.flash') as HTMLCanvasElement;
+const flash = screen.querySelector('.flash') as HTMLCanvasElement;
 flash.width = 256;
 flash.height = 240;
 const flashCtx = flash.getContext('2d') as CanvasRenderingContext2D;
@@ -30,13 +32,15 @@ let hasMask = false;
 
 // sprites
 
-const sprites = document.querySelector('.sprites') as HTMLCanvasElement;
+const sprites = screen.querySelector('.sprites') as HTMLCanvasElement;
 sprites.width = 256;
 sprites.height = 240;
 const spCtx = sprites.getContext('2d') as CanvasRenderingContext2D;
 sprites.style.backgroundColor = 'transparent';
 
 const OAM_SIZE = 0x80; // value is supposed to be 0x100
+
+let rotation = 0;
 
 export default class TetrisGfx {
     public renderBG(nes: NES) {
@@ -109,6 +113,17 @@ export default class TetrisGfx {
     }
 
     public renderSprites(nes: NES) {
+        if (firstPerson) {
+            const pressed = nes.RAM[ADDR.newlyPressedButtons_player1];
+            if (pressed & 0x80) {
+                rotation += 90;
+            }
+            if (pressed & 0x40) {
+                rotation -= 90;
+            }
+            screen.style.transform = `rotate(${rotation}deg`;
+        }
+
         const { RAM, VRAM } = nes;
         const oam = RAM.slice(0x200, 0x300);
 
