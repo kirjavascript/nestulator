@@ -96,6 +96,23 @@ export default class NES {
         this.RAM[ADDR.levelNumber] = level;
     }
 
+    public setMino(x: number, y: number, value: number) {
+        this.RAM[ADDR.playfield + x + (y * 0xA)] = value;
+    }
+
+    public clearPlayfield() {
+        for (let i = 0; i < 200; i++) {
+            this.RAM[ADDR.playfield + i] = 0xEF;
+        }
+    }
+
+    public vramLoop() {
+        if (this.RAM[ADDR.player1_vramRow] === 32) {
+            this.RAM[ADDR.player1_vramRow] = 0;
+            this.RAM[ADDR.vramRow] = 0;
+        }
+    }
+
     // event hooks
 
     public initGameState() {

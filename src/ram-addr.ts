@@ -1,3 +1,14 @@
+
+export const BUTTON_DOWN: number = 4;
+export const BUTTON_UP: number = 8;
+export const BUTTON_RIGHT: number = 1;
+export const BUTTON_LEFT: number = 2;
+export const BUTTON_B: number = 0x40;
+export const BUTTON_A: number = 0x80;
+export const BUTTON_SELECT: number = 0x20;
+export const BUTTON_START: number = 0x10;
+export const BLOCK_TILES: number = 0x7B;
+
 /*
  * this list has been generated from TAUS
  *
