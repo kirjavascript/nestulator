@@ -96,6 +96,14 @@ export default class NES {
         this.RAM[ADDR.levelNumber] = level;
     }
 
+    public setScore(score: number) {
+        const strScore = String(score).padStart(6, '0')
+        this.RAM[ADDR.outOfDateRenderFlags] = 0b100;
+        this.RAM[ADDR.player1_score] = parseInt(strScore.slice(4, 6), 16);
+        this.RAM[ADDR.player1_score+1] = parseInt(strScore.slice(2, 4), 16);
+        this.RAM[ADDR.player1_score+2] = parseInt(strScore.slice(0, 2), 16);
+    }
+
     public setMino(x: number, y: number, value: number) {
         this.RAM[ADDR.playfield + x + (y * 0xA)] = value;
     }
