@@ -6,6 +6,9 @@ Object.assign(window, { nes });
 
 buildUI(nes);
 
+import * as ADDR from './ram-addr';
+window.ADDR = ADDR;
+
 const frameCount = document.querySelector('.frameCount') as HTMLSpanElement;
 const epoch = performance.now();
 let framesDone = 0;
