@@ -12,5 +12,7 @@ export default class Demo {
 
     }
 
+    saveFrame() {
 
+    }
 }

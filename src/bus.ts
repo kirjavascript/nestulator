@@ -14,6 +14,7 @@ export default class TetrisBus implements BusInterface {
     chr0: number = 0;
     chr0Index: number = 0;
     joyIndex: number = 0;
+    lastLevel: number = 0;
     backgroundDirty: boolean = false;
     backgroundDisplay: boolean = true;
     sfx: number = 0;
@@ -75,6 +76,12 @@ export default class TetrisBus implements BusInterface {
     write(address: number, value: number): void {
         if (address === ADDR.renderMode) {
             this.nes.setRenderMode(value);
+        }
+        if (address === ADDR.levelNumber) {
+            if (value !== this.lastLevel) {
+                this.lastLevel = value;
+                this.backgroundDirty = true;
+            }
         }
         if (address === ADDR.outOfDateRenderFlags && value === 0x47) {
             this.nes.initGameState();
