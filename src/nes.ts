@@ -83,8 +83,8 @@ export default class NES {
         if (this.region !== Region.GYM) {
             this.PRG[0x1c89] = 0xfa; // maxout
             this.PRG[0x180c] = 0x90; // fix colours
-            // this.PRG[0x1a91] = 0x0; // auto win
-            // this.PRG[0x1bec] = 0xa5; // transition
+            this.PRG[0x1a91] = 0x0; // auto win
+            this.PRG[0x1bec] = 0xa5; // transition
         }
     }
 

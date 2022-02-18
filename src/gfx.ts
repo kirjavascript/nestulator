@@ -42,6 +42,11 @@ const OAM_SIZE = 0x80; // value is supposed to be 0x100
 
 let rotation = 0;
 
+const statPieceNTAddrs = Array.from({ length: 14 }, (_, i) => {
+    const nt = i * 0x20 + 0x163;
+    return [nt, nt + 1, nt + 2];
+}).reduce((acc, cur) => acc.concat(cur), []);
+
 export default class TetrisGfx {
     public renderBG(nes: NES) {
         if (!nes.bus.backgroundDisplay) {
@@ -52,10 +57,13 @@ export default class TetrisGfx {
         if (!noflash) {
             if (zap) {
                 background.style.filter =
-                    nes.RAM[ADDR.completedLines] === 4 ? 'invert(100%) hue-rotate(90deg)' : '';
+                    nes.RAM[ADDR.completedLines] === 4
+                        ? 'invert(100%) hue-rotate(90deg)'
+                        : '';
             } else {
                 flash.style.visibility =
-                    nes.RAM[ADDR.completedLines] === 4 && nes.bus.frames % 3 == 0
+                    nes.RAM[ADDR.completedLines] === 4 &&
+                    nes.bus.frames % 3 == 0
                         ? 'visible'
                         : 'hidden';
             }
@@ -178,6 +186,10 @@ export default class TetrisGfx {
                 spCtx.putImageData(buffer, x, yOffset);
             }
         }
+    }
+
+    updateStatPiecePalette(nes: NES) {
+        nes.ntUpdates.push.apply(nes.ntUpdates, statPieceNTAddrs);
     }
 
     setupFlashMask(nes: NES) {
