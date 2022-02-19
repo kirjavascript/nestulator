@@ -83,8 +83,8 @@ export default class NES {
         if (this.region !== Region.GYM) {
             this.PRG[0x1c89] = 0xfa; // maxout
             this.PRG[0x180c] = 0x90; // fix colours
-            this.PRG[0x1a91] = 0x0; // auto win
-            this.PRG[0x1bec] = 0xa5; // transition
+            // this.PRG[0x1a91] = 0x0; // auto win
+            // this.PRG[0x1bec] = 0xa5; // transition
         }
     }
 
@@ -143,14 +143,14 @@ export default class NES {
         if (shouldRender && this.runahead) {
             this.cpuFrame(false);
             const RAM = this.RAM.slice(0);
-            // const VRAM = this.VRAM.slice(0);
+            // technically VRAM should also be saved/restored here
+            // but not doig so has no effect and is faster
             const state = Object.assign({}, this.cpu.state);
             const cpu = Object.assign({}, this.cpu);
             const bus = Object.assign({}, this.bus);
             this.cpuFrame(true);
             // rollback
             this.RAM = RAM;
-            // this.VRAM = VRAM;
             Object.assign(this.bus, bus);
             Object.assign(this.cpu, cpu);
             Object.assign(this.cpu.state, state);

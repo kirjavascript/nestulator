@@ -8,6 +8,10 @@ export default class Demo {
 
     }
 
+    // decentralised format / no crypto / open format
+    // notice: ms timing with frames being 0 or 2
+    // RNG, inputs, timestamp, framecount, spawnCount,
+
     initGame() {
 
     }
