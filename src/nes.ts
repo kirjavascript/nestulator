@@ -125,7 +125,14 @@ export default class NES {
 
     public initGameState() {
         // happens twice in quick succession when a game is started
+        //https://github.com/6502ts/6502.ts/blob/master/doc/cpu.md#memory-access-patterns
         this.gfx.setupFlashMask(this);
+        // we need to update the palette for the piece counts
+        this.gfx.updateStatPiecePalette(this);
+    }
+
+    public levelUp() {
+        this.gfx.updateStatPiecePalette(this);
     }
 
     public setRenderMode(mode: number) {
@@ -144,7 +151,7 @@ export default class NES {
             this.cpuFrame(false);
             const RAM = this.RAM.slice(0);
             // technically VRAM should also be saved/restored here
-            // but not doig so has no effect and is faster
+            // but not doing so has no effect and is faster
             const state = Object.assign({}, this.cpu.state);
             const cpu = Object.assign({}, this.cpu);
             const bus = Object.assign({}, this.bus);

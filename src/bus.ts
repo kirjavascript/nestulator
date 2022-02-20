@@ -81,13 +81,11 @@ export default class TetrisBus implements BusInterface {
             if (value !== this.lastLevel) {
                 // if the level updates, change the stats colours
                 this.lastLevel = value;
-                this.nes.gfx.updateStatPiecePalette(this.nes);
+                this.nes.levelUp();
             }
         }
         if (address === ADDR.outOfDateRenderFlags && value === 0x47) {
             this.nes.initGameState();
-            // we need to update the palette for the piece counts
-            this.nes.gfx.updateStatPiecePalette(this.nes);
         }
         if (address === ADDR.soundEffectSlot1Init && value !== 0) {
             this.sfx = value;

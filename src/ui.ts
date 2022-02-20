@@ -79,6 +79,8 @@ export default function buildUI(nes: NES) {
             document.querySelector('main') as HTMLElement
         ).appendChild(document.createElement('pre'));
 
+        window.debugList = [];
+
         debug.style.position = 'absolute';
         debug.style.top = '0';
         debug.style.left = '0';
@@ -100,6 +102,11 @@ export default function buildUI(nes: NES) {
             debug.innerHTML = `
 frames: ${nes.bus.frames} PC: ${nes.cpu.state.p.toString(16)}
 ${JSON.stringify(nes.cpu.state)}
+${JSON.stringify(
+    window.debugList,
+    null,
+    4,
+)}
 ${JSON.stringify(
     gamepads.map((gp) => [
         gp.buttons.map((b) => `P: ${b.pressed} V: ${b.value} T ${b.touched}`),
