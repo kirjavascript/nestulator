@@ -75,17 +75,16 @@ export default class TetrisBus implements BusInterface {
     }
     write(address: number, value: number): void {
         if (address === ADDR.renderMode) {
-            this.nes.setRenderMode(value);
+            this.nes.runningAhead || this.nes.setRenderMode(value);
         }
         if (address === ADDR.levelNumber) {
             if (value !== this.lastLevel) {
-                // if the level updates, change the stats colours
                 this.lastLevel = value;
                 this.nes.levelUp();
             }
         }
         if (address === ADDR.outOfDateRenderFlags && value === 0x47) {
-            this.nes.initGameState();
+            this.nes.runningAhead || this.nes.initGameState();
         }
         if (address === ADDR.soundEffectSlot1Init && value !== 0) {
             this.sfx = value;

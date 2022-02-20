@@ -31,6 +31,7 @@ export default class NES {
     running!: boolean;
     sfxEnabled: boolean = false;
     runahead: boolean = true;
+    runningAhead: boolean = false;
 
     public constructor(ROM: Uint8Array = new Uint8Array()) {
         this.gfx = new TetrisGfx();
@@ -124,10 +125,7 @@ export default class NES {
     // event hooks
 
     public initGameState() {
-        // happens twice in quick succession when a game is started
-        //https://github.com/6502ts/6502.ts/blob/master/doc/cpu.md#memory-access-patterns
         this.gfx.setupFlashMask(this);
-        // we need to update the palette for the piece counts
         this.gfx.updateStatPiecePalette(this);
     }
 
@@ -136,7 +134,6 @@ export default class NES {
     }
 
     public setRenderMode(mode: number) {
-        // happens twice each change
         if ((mode & 0xE) === 0) {
             // set on 'menu' screens
             // cannot use the level select screen index alone because of tetrisgym
@@ -155,6 +152,7 @@ export default class NES {
             const state = Object.assign({}, this.cpu.state);
             const cpu = Object.assign({}, this.cpu);
             const bus = Object.assign({}, this.bus);
+            this.runningAhead = true;
             this.cpuFrame(true);
             // rollback
             this.RAM = RAM;
@@ -163,6 +161,7 @@ export default class NES {
             Object.assign(this.cpu.state, state);
             this.bus.backgroundDirty = false;
             this.bus.sfx = 0;
+            this.runningAhead = false;
 
         } else {
             this.cpuFrame(shouldRender);
