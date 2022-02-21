@@ -1,8 +1,9 @@
 import StateMachineCpu from '6502.ts/lib/machine/cpu/StateMachineCpu';
 import TetrisBus from './bus';
 import TetrisGfx from './gfx';
-import SpawnTable from './spawn-table';
 import { playSFX } from './audio';
+import SpawnTable from './spawn-table';
+import Demo from './demo';
 import * as ADDR from './ram-addr';
 
 const nmiCycles = 2273;
@@ -26,6 +27,7 @@ export default class NES {
     lastOAM: Uint8Array = new Uint8Array(0x100);
     region: Region = Region.NTSC;
     spawnTable!: SpawnTable;
+    demo!: Demo;
     framerate!: number;
     baseCycles!: number;
     running!: boolean;
@@ -64,6 +66,7 @@ export default class NES {
         }
 
         this.spawnTable = new SpawnTable(this);
+        this.demo = new Demo(this);
 
         // region stuff
 
@@ -127,6 +130,7 @@ export default class NES {
     public initGameState() {
         this.gfx.setupFlashMask(this);
         this.gfx.updateStatPiecePalette(this);
+        this.demo.startGame();
     }
 
     public levelUp() {
@@ -183,6 +187,10 @@ export default class NES {
 
         if (shouldRender) {
             this.gfx.renderSprites(this);
+        }
+
+        if (!this.runningAhead) {
+            this.demo.frame(shouldRender);
         }
 
         if (this.bus.nmiEnabled) {
