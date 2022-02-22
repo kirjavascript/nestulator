@@ -15,6 +15,7 @@ export default class Demo {
     // test.json
 
     // track CPU frame
+    // checksum
 
     // decentralised format / no crypto / open format
     // notice: ms timing with frames being 0 or 2
@@ -37,19 +38,16 @@ export default class Demo {
 
     frame(shouldRender: boolean) {
         if (this.recording) {
+            console.log(this.nes.RAM[ADDR.gameModeState]);
             const now = (new Date).getTime();
+            const checksum = now % 0x100;
             const frameData = [
-                this.nes.bus.frames,
                 now,
+                this.nes.bus.frames,
+                this.nes.RAM.slice(0x17, 0x1b),
                 Array.from({ length: 8 }, (_, i) => buttonIsDown(i)),
                 shouldRender,
-                this.nes.RAM[now % 0x100],
-                this.nes.RAM[ADDR.tetriminoX],
-                this.nes.RAM[ADDR.tetriminoY],
-                this.nes.RAM[ADDR.currentPiece],
-                this.nes.RAM[ADDR.player1_vramRow],
-                this.nes.RAM.slice(0x53, 0x56),
-                this.nes.RAM.slice(0x17, 0x1b),
+                this.nes.RAM[checksum] | this.nes.RAM[checksum + 0x400] << 8,
             ];
 
             this.frames.push(frameData);
