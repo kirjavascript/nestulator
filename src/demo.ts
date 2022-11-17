@@ -41,6 +41,7 @@ export default class Demo {
             console.log(this.nes.RAM[ADDR.gameModeState]);
             const now = (new Date).getTime();
             const checksum = now % 0x100;
+            const held = this.nes.RAM[ADDR.heldButtons];
             const frameData = [
                 now,
                 this.nes.bus.frames,
@@ -48,6 +49,7 @@ export default class Demo {
                 Array.from({ length: 8 }, (_, i) => buttonIsDown(i)),
                 shouldRender,
                 this.nes.RAM[checksum] | this.nes.RAM[checksum + 0x400] << 8,
+                this.nes.RAM[held] | this.nes.RAM[held + 0x400] << 8,
             ];
 
             this.frames.push(frameData);

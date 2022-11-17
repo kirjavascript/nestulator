@@ -29,9 +29,24 @@ export default function buildUI(nes: NES) {
 
     // fullscreen
 
+    function requestFullscreenMethod(element: HTMLElement) {
+        return (
+            element.requestFullscreen ||
+                // @ts-ignore
+                element.webkitRequestFullscreen ||
+                // @ts-ignore
+                element.webkitEnterFullscreen
+        );
+    }
+
+    function requestFullscreen(element: HTMLElement) {
+        requestFullscreenMethod(element)
+        .bind(element)()
+            ?.catch?.(console.error);
+    }
     const screen = document.querySelector('.screen') as HTMLDivElement;
     function fullscreen() {
-        screen.requestFullscreen().catch(console.error);
+        requestFullscreen(screen);
     }
     (
         document.querySelector('#fullscreen') as HTMLButtonElement
