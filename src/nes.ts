@@ -156,10 +156,12 @@ export default class NES {
             const state = Object.assign({}, this.cpu.state);
             const cpu = Object.assign({}, this.cpu);
             const bus = Object.assign({}, this.bus);
+            const cheat = this.cheat;
             this.runningAhead = true;
             this.cpuFrame(true);
             // rollback
             this.RAM = RAM;
+            this.cheat = cheat;
             Object.assign(this.bus, bus);
             Object.assign(this.cpu, cpu);
             Object.assign(this.cpu.state, state);

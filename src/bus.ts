@@ -31,11 +31,11 @@ export default class TetrisBus implements BusInterface {
         if (address === 0xffff) return 0x80;
 
         if (
-            this.nes.spawnTable.patching &&
+            this.nes.cheat &&
             address >= this.nes.spawnTable.offset &&
             address < this.nes.spawnTable.offset + 7
         ) {
-            return this.nes.spawnTable.next();
+            return 0x12
         }
 
         if (address === ADDR.verticalBlankingInterval) {
@@ -69,11 +69,15 @@ export default class TetrisBus implements BusInterface {
             return this.nes.PRG[address - 0x8000];
         }
 
-        console.log(['last', Number(this.nes.cpu.state.p).toString(16)]);
-        console.error('read', address.toString(16));
+        // console.log(['last', Number(this.nes.cpu.state.p).toString(16)]);
+        // console.error('read', address.toString(16));
         return 0;
     }
     write(address: number, value: number): void {
+        if (address === ADDR.nextPiece) {
+            this.nes.cheat = false;
+        }
+
         if (address === ADDR.renderMode) {
             this.nes.runningAhead || this.nes.setRenderMode(value);
         }

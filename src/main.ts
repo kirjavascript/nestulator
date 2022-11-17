@@ -4,6 +4,14 @@ import buildUI from './ui';
 const nes = new NES();
 Object.assign(window, { nes });
 
+nes.cheat = false;
+
+window.addEventListener('keydown', (e) => {
+    if (e.key == ' ') {
+        nes.cheat = true;
+    }
+});
+
 buildUI(nes);
 
 import * as ADDR from './ram-addr';
@@ -29,6 +37,7 @@ const loop = () => {
             }
         }
     }
+
     framesDone = frames;
 };
 loop();

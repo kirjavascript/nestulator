@@ -38,7 +38,6 @@ export default class Demo {
 
     frame(shouldRender: boolean) {
         if (this.recording) {
-            console.log(this.nes.RAM[ADDR.gameModeState]);
             const now = (new Date).getTime();
             const checksum = now % 0x100;
             const held = this.nes.RAM[ADDR.heldButtons];
